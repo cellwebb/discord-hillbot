@@ -1,9 +1,9 @@
 import os
 import logging
+import time
 
 import discord
 import openai
-
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
@@ -21,14 +21,15 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    print(f'Message from {message.author}: {message.content}')
+    print(f'Message from {message.author} in channel {message.channel}: {message.content}')
 
     if message.author == client.user:
         return
 
     if message.content.lower().startswith('!davefacts'):
+        # or message.channel == r'<#1119702934406566061>' \
         with open('davefacts.txt', 'a') as f:
-            new_fact = message.content[10:].strip()
+            new_fact = message.replace('!davefacts', '').strip()
             if not new_fact.endswith('.'):
                 new_fact += '.'
             f.write('- ' + new_fact + '\n')
@@ -36,7 +37,7 @@ async def on_message(message):
         return
 
     if 'hillbot' in message.content.lower() \
-        or '<@1119312653765050429>' in message.content \
+        or r'<@1119312653765050429>' in message.content \
         or client.user.mentioned_in(message):
 
         with open('system.txt') as f:
@@ -45,15 +46,30 @@ async def on_message(message):
             davefacts = f.read()
 
         print('calling openai api...')
-        chat_completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": system_msg + '\n' + davefacts},
-                {"role": "user", "content": message.content},
-            ],
-            temperature=1.2
-        )
-        response = chat_completion.choices[0].message.content
+        for n_attempts in range(1, 6):
+            try:
+                chat_completion = openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": system_msg + '\n' + davefacts},
+                        {"role": "user", "content": message.content},
+                    ],
+                    temperature=1.2
+                )
+                response = chat_completion.choices[0].message.content
+                break
+            except openai.error.RateLimitError as err:
+                wait_period = 60 * n_attempts
+                await message.channel.send(
+                    f"{err} occurred! I'll try again in {wait_period} seconds!")
+                time.sleep(wait_period)
+            except openai.error.APIError as err:
+                await message.channel.send(f"{err} occurred! I'll try re-connecting to the API!")
+                time.sleep(5)
+                openai.api_key = os.getenv("OPENAI_API_KEY")
+                time.sleep(5)
+        else:
+            response = "The server is busy! Please try again later!"
         await message.channel.send(response)
 
 client.run(token, log_handler=handler)
