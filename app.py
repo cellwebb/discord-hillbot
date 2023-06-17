@@ -29,7 +29,7 @@ async def on_message(message):
     if message.content.lower().startswith('!davefacts'):
         # or message.channel == r'<#1119702934406566061>' \
         with open('davefacts.txt', 'a') as f:
-            new_fact = message.replace('!davefacts', '').strip().replace('dave', 'Dave')
+            new_fact = message.content.replace('!davefacts', '').strip().replace('dave', 'Dave')
             if not new_fact.endswith('.'):
                 new_fact += '.'
             f.write('- ' + new_fact + '\n')
@@ -54,7 +54,7 @@ async def on_message(message):
                         {"role": "system", "content": system_msg + '\n' + davefacts},
                         {"role": "user", "content": message.content},
                     ],
-                    temperature=1.2
+                    temperature=1.3
                 )
                 response = chat_completion.choices[0].message.content
                 break
