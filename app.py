@@ -5,7 +5,6 @@ import time
 import discord
 import openai
 
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 token = os.getenv("DISCORD_HILLBOT_TOKEN")
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -21,7 +20,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    print(f'Message from {message.author} in channel {message.channel}: {message.content}')
+    print(f'Message from {message.author} in #{message.channel}: {message.content}')
 
     if message.author == client.user:
         return
@@ -72,4 +71,6 @@ async def on_message(message):
             response = "The server is busy! Please try again later!"
         await message.channel.send(response)
 
+
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 client.run(token, log_handler=handler)
