@@ -27,8 +27,7 @@ async def on_message(message):
 
     if message.content.startswith('!davefacts'):
         with open('davefacts.txt', 'a') as f:
-            new_fact = message.content.replace('!davefacts', '').replace('dave', 'Dave').strip()
-            new_fact = new_fact if new_fact.endswith('.') else new_fact + '.'
+            new_fact = message.content.replace('!davefacts', '').strip()
             f.write('- ' + new_fact + '\n')
         await message.channel.send('Thanks for telling me more about Dave!')
         return
@@ -40,7 +39,8 @@ async def on_message(message):
             davefacts = f.read()
 
         print('pulling conversation history...')
-        conversation_history_generator = message.channel.history(limit=5)
+        from config import channel_history_limit
+        conversation_history_generator = message.channel.history(limit=channel_history_limit)
         conversation_history = []
         async for prev_message in conversation_history_generator:
             conversation_history.append(
@@ -54,12 +54,13 @@ async def on_message(message):
 
         print(messages)
         print('calling openai api...')
-        for n_attempts in range(1, 6):
+        from config import max_openai_api_attempts, temperature
+        for n_attempts in range(1, max_openai_api_attempts):
             try:
                 chat_completion = openai.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=messages,
-                    temperature=1.25
+                    temperature=temperature
                 )
                 response = chat_completion.choices[0].message.content
                 break
