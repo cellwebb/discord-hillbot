@@ -16,11 +16,11 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
-    print(f'We have logged in as {client.user}')
+    print(f'{time.strftime("%I:%M:%S %p")} -  We have logged in as {client.user}')
 
 @client.event
 async def on_message(message):
-    print(f'Message from {message.author} in #{message.channel}: {message.content}')
+    print(f'{time.strftime("%I:%M:%S %p")} -  Message from {message.author} in #{message.channel}: {message.content}')
 
     if message.author == client.user:
         return
@@ -57,13 +57,13 @@ async def on_message(message):
                 )
                 response = chat_completion.choices[0].message.content
                 break
-            except openai.error.RateLimitError as err:
+            except (openai.error.RateLimitError, openai.error.ServiceUnavailableError) as err:
                 wait_period = 60 * n_attempts
                 await message.channel.send(
-                    f"{err} occurred! I'll try again in {wait_period} seconds!")
+                    f"{err} I'll try again in {wait_period} seconds!")
                 time.sleep(wait_period)
             except openai.error.APIError as err:
-                await message.channel.send(f"{err} occurred! I'll try re-connecting to the API!")
+                await message.channel.send(f"{err} I'll try re-connecting to the API!")
                 time.sleep(5)
                 openai.api_key = os.getenv("OPENAI_API_KEY")
                 time.sleep(5)
