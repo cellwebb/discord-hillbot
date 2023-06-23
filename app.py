@@ -4,6 +4,7 @@ import time
 
 import discord
 import openai
+import tiktoken
 
 
 token = os.getenv("DISCORD_HILLBOT_TOKEN")
@@ -47,6 +48,22 @@ async def on_message(message):
                 {"role": "assistant" if prev_message.author == client.user else "user",
                  "content": prev_message.content})
         conversation_history.reverse()
+
+        # break down long messages
+        i = 0
+        while i < len(conversation_history):
+            if len(conversation_history[i]["content"]) > 2000:
+                encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+                tokenized_content = encoding.encode(conversation_history[i]["content"])
+                num_tokens = len(tokenized_content)
+                if num_tokens > 2000:
+                    conversation_history[i]["content"] = ''.join(tokenized_content[:2000])
+                    conversation_history.insert(
+                        i + 1,
+                        {"role": conversation_history[i]["role"],
+                         "content": tokenized_content[2000:]}
+                    )
+            i += 1
 
         messages = [{"role": "system", "content": system_msg + '\n' + davefacts}]
         messages.extend(conversation_history)
