@@ -49,7 +49,7 @@ async def on_message(message):
                  "content": prev_message.content})
         conversation_history.reverse()
 
-        # break down long messages
+        print('chunking long messages...')
         i = 0
         while i < len(conversation_history):
             if len(conversation_history[i]["content"]) > 2000:
