@@ -1,3 +1,5 @@
+from image import create_image
+
 import os
 import logging
 import time
@@ -31,6 +33,12 @@ async def on_message(message):
             new_fact = message.content.replace('!davefacts', '').strip()
             f.write('- ' + new_fact + '\n')
         await message.channel.send('Thanks for telling me more about Dave!')
+        return
+
+    if message.content.startswith('!image'):
+        print('calling openai api...')
+        base_prompt = message.content.replace('!image', '').strip()
+        await message.channel.send(create_image(base_prompt=base_prompt))
         return
 
     if 'hillbot' in message.content.lower() or client.user.mentioned_in(message):
