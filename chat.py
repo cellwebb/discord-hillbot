@@ -1,11 +1,8 @@
 import tiktoken
 
 def chunk_long_messages(conversation_history: List[Dict[str]]) -> None:
-    """Splits long messages in a conversation history to satisfy requirements
-    for 'gpt-3.5-turbo'.
-
-    Messages with 2001 or more tokens are split into multiple messages
-    with the same "role"."""
+    """Splits long messages (2001+ tokens) in a conversation history to
+    satisfy 'gpt-3.5-turbo' requirements."""
     i = 0
     while i < len(conversation_history):
         if len(conversation_history[i]["content"]) > 2000:
