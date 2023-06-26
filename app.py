@@ -1,4 +1,3 @@
-
 import os
 import logging
 import time
@@ -7,6 +6,7 @@ import discord
 import openai
 import tiktoken
 
+from image import improve_image_prompt, create_image, save_image_from_url
 
 token = os.getenv("DISCORD_HILLBOT_TOKEN")
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -36,15 +36,19 @@ async def on_message(message):
 
     if message.content.startswith('!image'):
         from config import max_openai_api_attempts
-        from image import create_image
         for n_attempts in range(1, max_openai_api_attempts):
             try:
                 print('calling openai api...')
                 base_prompt = message.content.replace('!image', '').strip()
-                await message.channel.send(create_image(base_prompt=base_prompt))
-            except openai.error.InvalidRequestError as err:
-                await message.channel.send(err)
-                break
+                prompt = improve_image_prompt(base_prompt)
+                print(prompt)
+                image_url = create_image(prompt)
+                filename = save_image_from_url(image_url)
+                print(f'file saved to: {filename}')
+                await message.channel.send(file=discord.File(filename))
+                with open('image_logs.txt', 'a') as f:
+                    f.write(f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n')
+                return
             except (openai.error.APIError,
                     openai.error.RateLimitError,
                     openai.error.ServiceUnavailableError) as err:
@@ -53,8 +57,7 @@ async def on_message(message):
                 time.sleep(wait_period)
             except Exception as err:
                 await message.channel.send(err)
-                break
-        return
+                return
 
     if 'hillbot' in message.content.lower() or client.user.mentioned_in(message):
         with open('system.txt') as f:
