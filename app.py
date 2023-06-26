@@ -1,4 +1,3 @@
-from image import create_image
 
 import os
 import logging
@@ -36,9 +35,25 @@ async def on_message(message):
         return
 
     if message.content.startswith('!image'):
-        print('calling openai api...')
-        base_prompt = message.content.replace('!image', '').strip()
-        await message.channel.send(create_image(base_prompt=base_prompt))
+        from config import max_openai_api_attempts
+        from image import create_image
+        for n_attempts in range(1, max_openai_api_attempts):
+            try:
+                print('calling openai api...')
+                base_prompt = message.content.replace('!image', '').strip()
+                await message.channel.send(create_image(base_prompt=base_prompt))
+            except openai.error.InvalidRequestError as err:
+                await message.channel.send(err)
+                break
+            except (openai.error.APIError,
+                    openai.error.RateLimitError,
+                    openai.error.ServiceUnavailableError) as err:
+                wait_period = 30 * n_attempts
+                await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
+                time.sleep(wait_period)
+            except Exception as err:
+                await message.channel.send(err)
+                break
         return
 
     if 'hillbot' in message.content.lower() or client.user.mentioned_in(message):
