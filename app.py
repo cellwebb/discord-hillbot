@@ -3,16 +3,18 @@ import logging
 import time
 
 import discord
-import openai
-import tiktoken
+from openai.error import APIError, RateLimitError, ServiceUnavailableError
 
-from chat import get_discord_conversation_history, chunk_long_messages
+from chat import (
+    get_discord_conversation_history,
+    chunk_long_messages,
+    reply_with_chatgpt
+)
 from image import improve_image_prompt, create_image, save_image_from_url
 from config import channel_history_limit
 
 
 token = os.getenv("DISCORD_HILLBOT_TOKEN")
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -51,9 +53,7 @@ async def on_message(message):
                     with open('image_logs.txt', 'a') as f:
                         f.write(f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n')
                     return
-                except (openai.error.APIError,
-                        openai.error.RateLimitError,
-                        openai.error.ServiceUnavailableError) as err:
+                except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
                     time.sleep(wait_period)
@@ -81,25 +81,17 @@ async def on_message(message):
 
             print(messages)
             print('calling openai api...')
-            from config import max_openai_api_attempts, temperature
+            from config import max_openai_api_attempts
             for n_attempts in range(1, max_openai_api_attempts):
                 try:
-                    chat_completion = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=messages,
-                        temperature=temperature
-                    )
-                    response = chat_completion.choices[0].message.content
-                    break
-                except (openai.error.RateLimitError, openai.error.ServiceUnavailableError) as err:
+                    await reply_with_chatgpt(message, messages)
+                except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
                     time.sleep(wait_period)
-                except openai.error.APIError as err:
-                    await message.channel.send(f"{err} I'll try re-connecting to the API!")
-                    time.sleep(5)
-                    openai.api_key = os.getenv("OPENAI_API_KEY")
-                    time.sleep(5)
+                except Exception as err:
+                    await message.channel.send(err)
+                    return
             else:
                 response = "The server is busy! Please try again later!"
             await message.channel.send(response)

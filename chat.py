@@ -1,5 +1,8 @@
+import openai
+import os
 import tiktoken
 
+from config import temperature
 
 def chunk_long_messages(conversation_history: list[dict[str]]) -> None:
     """Splits long messages (2001+ tokens) in a conversation history to
@@ -34,3 +37,15 @@ async def get_discord_conversation_history(
     conversation_history.reverse()
 
     return conversation_history
+
+
+async def reply_with_chatgpt(message, messages: list[dict[str]]) -> None:
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    chat_completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        temperature=temperature
+    )
+    response = chat_completion.choices[0].message.content
+    await message.channel.send(response)
+    return
