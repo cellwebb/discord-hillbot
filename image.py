@@ -5,7 +5,7 @@ import requests
 import uuid
 
 
-PROMPT_EXTENSIONS = [
+PROMPT_ENHANCERS = [
     'created by a talented human artist named Dave',
     'created by a talented robot artist named Hillbot',
     'photorealistic',
@@ -17,6 +17,16 @@ PROMPT_EXTENSIONS = [
     'in the style of Jean-Michel Basquiat',
     'in the style of Pablo Picasso',
     'in the style of Salvador Dali',
+    'ancient roman painting',
+    'charcoal sketch',
+    'etching',
+    'political cartoon from US newspaper',
+    'children\'s drawing',
+    'scientific diagram',
+    'screenshot from Final Fantasy 7',
+    'in the style of Disney vintage animation',
+    'field journal line art',
+    'colored pencil, detailed',
     'aesthetic',
     'beautiful',
     'cinematic lighting',
@@ -38,8 +48,7 @@ def create_image(prompt: str = "cat") -> str:
 
 
 def improve_image_prompt(base_prompt: str) -> str:
-    
-    prompt = f"{base_prompt} {random.choice(PROMPT_EXTENSIONS)}"
+    prompt = f"{base_prompt}, {random.choice(PROMPT_ENHANCERS)}"
     return prompt
 
 
