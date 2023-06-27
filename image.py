@@ -5,6 +5,30 @@ import requests
 import uuid
 
 
+PROMPT_EXTENSIONS = [
+    'created by a talented human artist named Dave',
+    'created by a talented robot artist named Hillbot',
+    'photorealistic',
+    'made of meat',
+    'in the style of a biblical angel',
+    'in the style of an unsettling image',
+    'with fingers for hot dogs',
+    'with hot dogs for fingers',
+    'in the style of Jean-Michel Basquiat',
+    'in the style of Pablo Picasso',
+    'in the style of Salvador Dali',
+    'aesthetic',
+    'beautiful',
+    'cinematic lighting',
+    'fantasy',
+    'futuristic', 
+    'masterpiece', 
+    'photorealistic',
+    'psychedelic',
+    'vaporwave',
+]
+
+
 def create_image(prompt: str = "cat") -> str:
     openai.api_key = os.getenv("OPENAI_API_KEY")
     response = openai.Image.create(prompt=prompt, n=1, size="1024x1024")
@@ -13,10 +37,8 @@ def create_image(prompt: str = "cat") -> str:
 
 
 def improve_image_prompt(base_prompt: str) -> str:
-    from config import prompt_extensions
-    prompt = base_prompt + " " \
-        + " ".join(random.sample(prompt_extensions, k=random.randint(1, 4))) \
-        + " beautiful art"
+    
+    prompt = f"{base_prompt} {random.choice(PROMPT_EXTENSIONS)}"
     return prompt
 
 
