@@ -1,8 +1,8 @@
-import os
+import discord
 import logging
+import os
 import time
 
-import discord
 from openai.error import APIError, RateLimitError, ServiceUnavailableError
 
 from chat import (
@@ -11,10 +11,8 @@ from chat import (
     reply_with_chatgpt
 )
 from image import improve_image_prompt, create_image, save_image_from_url
-from config import channel_history_limit
+from config import channel_history_limit, max_openai_api_attempts
 
-
-token = os.getenv("DISCORD_HILLBOT_TOKEN")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -27,7 +25,7 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    print(f'{time.strftime("%I:%M:%S %p")} - Message from {message.author} in #{message.channel}: {message.content}')
+    print(f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}')
 
     if message.author == client.user:
         return
@@ -41,7 +39,6 @@ async def on_message(message):
 
     if message.content.startswith('!image'):
         async with message.channel.typing():
-            from config import max_openai_api_attempts
             for n_attempts in range(1, max_openai_api_attempts):
                 try:
                     print('calling openai api...')
@@ -81,7 +78,6 @@ async def on_message(message):
 
             print(messages)
             print('calling openai api...')
-            from config import max_openai_api_attempts
             for n_attempts in range(1, max_openai_api_attempts):
                 try:
                     await reply_with_chatgpt(message, messages)
@@ -98,4 +94,5 @@ async def on_message(message):
 
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+token = os.getenv("DISCORD_HILLBOT_TOKEN")
 client.run(token, log_handler=handler)
