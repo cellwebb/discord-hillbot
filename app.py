@@ -6,12 +6,15 @@ import time
 from openai.error import APIError, RateLimitError, ServiceUnavailableError
 
 from chat import (
-    get_discord_conversation_history,
-    chunk_long_messages,
+    get_channel_history,
+    chunk_messages,
     reply_with_chatgpt
 )
-from image import improve_image_prompt, create_image, save_image_from_url
-from config import channel_history_limit, max_openai_api_attempts
+from image import (
+    create_image, 
+    improve_image_prompt,
+    save_image_from_url
+)
 
 
 intents = discord.Intents.default()
@@ -39,7 +42,7 @@ async def on_message(message):
 
     if message.content.startswith('!image'):
         async with message.channel.typing():
-            for n_attempts in range(1, max_openai_api_attempts):
+            for n_attempts in range(1, 6):
                 try:
                     print('calling openai api...')
                     prompt = message.content.replace('!image', '').strip()
@@ -65,22 +68,21 @@ async def on_message(message):
             with open('davefacts.txt') as f:
                 davefacts = f.read()
 
-            print('pulling conversation history...')
-            conversation_history = await get_discord_conversation_history(
-                client, message, channel_history_limit)
-
-            print('chunking long messages...')
-            chunk_long_messages(conversation_history)
+            print('pulling channel history...')
+            conversation_history = await get_channel_history(client, message.channel)
 
             messages = [{"role": "system", "content": system_msg + '\n' + davefacts}]
             messages.extend(conversation_history)
             messages[-1]["content"] = "Reply in Dave's voice. " + messages[-1]["content"]
 
+            print('chunking long messages...')
+            chunk_messages(messages)
+
             print(messages)
             print('calling openai api...')
-            for n_attempts in range(1, max_openai_api_attempts):
+            for n_attempts in range(1, 6):
                 try:
-                    await reply_with_chatgpt(message, messages)
+                    await reply_with_chatgpt(message.channel, messages)
                 except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
