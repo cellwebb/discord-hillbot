@@ -6,8 +6,10 @@ import discord
 import openai
 import tiktoken
 
-from chat import chunk_long_messages
+from chat import get_discord_conversation_history, chunk_long_messages
 from image import improve_image_prompt, create_image, save_image_from_url
+from config import channel_history_limit
+
 
 token = os.getenv("DISCORD_HILLBOT_TOKEN")
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -41,13 +43,11 @@ async def on_message(message):
             for n_attempts in range(1, max_openai_api_attempts):
                 try:
                     print('calling openai api...')
-                    base_prompt = message.content.replace('!image', '').strip()
-                    prompt = improve_image_prompt(base_prompt)
-                    print(prompt)
+                    prompt = message.content.replace('!image', '').strip()
+                    prompt = improve_image_prompt(prompt)
                     image_url = create_image(prompt)
                     filename = save_image_from_url(image_url)
-                    print(f'file saved to: {filename}')
-                    await message.channel.send(file=discord.File(filename))
+                    await message.channel.send(prompt, file=discord.File(filename))
                     with open('image_logs.txt', 'a') as f:
                         f.write(f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n')
                     return
@@ -69,14 +69,8 @@ async def on_message(message):
                 davefacts = f.read()
 
             print('pulling conversation history...')
-            from config import channel_history_limit
-            conversation_history_generator = message.channel.history(limit=channel_history_limit)
-            conversation_history = []
-            async for prev_message in conversation_history_generator:
-                conversation_history.append(
-                    {"role": "assistant" if prev_message.author == client.user else "user",
-                    "content": prev_message.content})
-            conversation_history.reverse()
+            conversation_history = await get_discord_conversation_history(
+                client, message, channel_history_limit)
 
             print('chunking long messages...')
             chunk_long_messages(conversation_history)
