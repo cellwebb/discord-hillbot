@@ -83,6 +83,7 @@ async def on_message(message):
             for n_attempts in range(1, 6):
                 try:
                     await reply_with_chatgpt(message.channel, messages)
+                    return
                 except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")

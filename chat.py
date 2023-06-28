@@ -4,6 +4,7 @@ import tiktoken
 
 from config import CHANNEL_HISTORY_LIMIT, TEMPERATURE
 
+
 async def reply_with_chatgpt(channel: object, messages: list[dict[str]]) -> None:
     openai.api_key = os.getenv("OPENAI_API_KEY")
     chat_completion = openai.ChatCompletion.create(
@@ -13,6 +14,7 @@ async def reply_with_chatgpt(channel: object, messages: list[dict[str]]) -> None
     )
     response = chat_completion.choices[0].message.content
     await channel.send(response)
+    return
 
 
 def chunk_messages(messages: list[dict[str]]) -> None:
@@ -38,7 +40,7 @@ async def get_channel_history(client: object, channel: object) -> list[dict[str]
     """Asynchronously pulls messages from a channel and converts to format
     requirements of 'gpt-3.5-turbo'."""
     channel_history_generator = channel.history(limit=CHANNEL_HISTORY_LIMIT)
-    channel_history = [prev_message async for prev_message in channel_history_generator]
+    channel_history = []
     async for prev_message in channel_history_generator:
         channel_history.append({
             "role": "assistant" if prev_message.author == client.user else "user",
