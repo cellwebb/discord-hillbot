@@ -7,8 +7,8 @@ from openai.error import APIError, RateLimitError, ServiceUnavailableError
 
 from chat import (
     get_channel_history,
-    chunk_messages,
-    reply_with_chatgpt
+    get_chatgpt_response,
+    chunk_messages
 )
 from image import (
     create_image, 
@@ -61,7 +61,7 @@ async def on_message(message):
                     await message.channel.send(err)
                     return
 
-    if 'hillbot' in message.content.lower() or client.user.mentioned_in(message):
+    if 'hillbot' in message.content.lower() or client.user.mentioned_in(message) or not message.guild:
         async with message.channel.typing():
             with open('system.txt') as f:
                 system_msg = f.read()
@@ -82,8 +82,8 @@ async def on_message(message):
             print('calling openai api...')
             for n_attempts in range(1, 6):
                 try:
-                    await reply_with_chatgpt(message.channel, messages)
-                    return
+                    response = get_chatgpt_response(messages)
+                    break
                 except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")

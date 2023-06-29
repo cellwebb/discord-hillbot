@@ -5,7 +5,7 @@ import tiktoken
 from config import CHANNEL_HISTORY_LIMIT, TEMPERATURE
 
 
-async def reply_with_chatgpt(channel: object, messages: list[dict[str]]) -> None:
+def get_chatgpt_response(messages: list[dict[str]]) -> None:
     openai.api_key = os.getenv("OPENAI_API_KEY")
     chat_completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -13,8 +13,7 @@ async def reply_with_chatgpt(channel: object, messages: list[dict[str]]) -> None
         temperature=TEMPERATURE
     )
     response = chat_completion.choices[0].message.content
-    await channel.send(response)
-    return
+    return response
 
 
 def chunk_messages(messages: list[dict[str]]) -> None:
