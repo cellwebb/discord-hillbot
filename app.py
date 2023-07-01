@@ -76,7 +76,7 @@ async def on_message(message):
             messages[-1]["content"] = "Reply in Dave's voice. " + messages[-1]["content"]
 
             print('chunking long messages...')
-            chunk_messages(messages)
+            messages = chunk_messages(messages)
 
             print(messages)
             print('calling openai api...')

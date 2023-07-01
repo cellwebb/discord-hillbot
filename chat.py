@@ -16,7 +16,7 @@ def get_chatgpt_response(messages: list[dict[str]]) -> None:
     return response
 
 
-def chunk_messages(messages: list[dict[str]]) -> None:
+def chunk_messages(messages: list[dict[str]]) -> list[dict[str]]:
     """Splits long messages (2001+ tokens) in a conversation history to
     satisfy 'gpt-3.5-turbo' requirements."""
     i = 0
@@ -33,7 +33,7 @@ def chunk_messages(messages: list[dict[str]]) -> None:
                     "content": tokenized_content[2000:]}
                 )
         i += 1
-
+    return messages
 
 async def get_channel_history(client: object, channel: object) -> list[dict[str]]:
     """Asynchronously pulls messages from a channel and converts to format
