@@ -17,6 +17,8 @@ from image import (
 )
 
 
+DISCORD_CHARACTER_LIMIT = 2000
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -28,7 +30,8 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    print(f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}')
+    with open('discord.log', 'a') as f:
+        f.write(f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}\n')
 
     if message.author == client.user:
         return
@@ -74,17 +77,13 @@ async def on_message(message):
             messages = [{"role": "system", "content": system_msg + '\n' + davefacts}]
             messages.extend(conversation_history)
             messages[-1]["content"] = "Reply in Dave's voice. " + messages[-1]["content"]
-
-            print('chunking long messages...')
             messages = chunk_messages(messages)
 
-            print(messages)
-            print('calling openai api...')
             for n_attempts in range(1, 6):
                 try:
                     response = get_chatgpt_response(messages)
-                    for i in range(0, len(response), 2000):
-                        await message.channel.send(response[i:i+2000])
+                    for i in range(0, len(response), DISCORD_CHARACTER_LIMIT):
+                        await message.channel.send(response[i:i+DISCORD_CHARACTER_LIMIT])
                     return
                 except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
