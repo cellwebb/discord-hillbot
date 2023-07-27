@@ -26,7 +26,7 @@ async def on_ready():
 async def on_message(message):
     with open("discord.log", "a") as f:
         f.write(
-            f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}\n'
+            f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}\n'  # noqa
         )
 
     if message.author == client.user:
@@ -51,7 +51,7 @@ async def on_message(message):
                     await message.channel.send(prompt, file=discord.File(filename))
                     with open("image_logs.txt", "a") as f:
                         f.write(
-                            f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n'
+                            f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n'  # noqa
                         )
                     return
                 except (APIError, RateLimitError, ServiceUnavailableError) as err:
