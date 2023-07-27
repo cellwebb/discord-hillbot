@@ -5,7 +5,7 @@ import tiktoken
 from config import CHANNEL_HISTORY_LIMIT, TEMPERATURE
 
 
-def get_chatgpt_response(messages: list[dict[str]]) -> None:
+def get_chatgpt_response(messages: list[dict[str]]) -> str:
     openai.api_key = os.getenv("OPENAI_API_KEY")
     chat_completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo", messages=messages, temperature=TEMPERATURE
