@@ -83,7 +83,9 @@ async def on_message(message):
             for n_attempts in range(1, 6):
                 try:
                     response = get_chatgpt_response(messages)
-                    break
+                    for i in range(0, len(response), 2000):
+                        await message.channel.send(response[i:i+2000])
+                    return
                 except (APIError, RateLimitError, ServiceUnavailableError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
@@ -91,9 +93,8 @@ async def on_message(message):
                 except Exception as err:
                     await message.channel.send(err)
                     return
-            else:
-                response = "The server is busy! Please try again later!"
-            await message.channel.send(response)
+            await message.channel.send("The server is busy! Please try again later!")
+            return
 
 
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
