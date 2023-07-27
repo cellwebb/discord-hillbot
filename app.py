@@ -61,6 +61,9 @@ async def on_message(message):
                 except Exception as err:
                     await message.channel.send(err)
                     return
+            else:
+                await message.channel.send("The server is busy! Please try again later!")
+                return
 
     if (
         "hillbot" in message.content.lower()
@@ -73,7 +76,6 @@ async def on_message(message):
             with open("davefacts.txt") as f:
                 davefacts = f.read()
 
-            print("pulling channel history...")
             conversation_history = await get_channel_history(client, message.channel)
 
             messages = [{"role": "system", "content": system_msg + "\n" + davefacts}]
@@ -94,8 +96,9 @@ async def on_message(message):
                 except Exception as err:
                     await message.channel.send(err)
                     return
-            await message.channel.send("The server is busy! Please try again later!")
-            return
+            else:
+                await message.channel.send("The server is busy! Please try again later!")
+                return
 
 
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
