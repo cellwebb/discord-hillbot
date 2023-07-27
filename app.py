@@ -43,7 +43,6 @@ async def on_message(message):
         async with message.channel.typing():
             for n_attempts in range(1, 6):
                 try:
-                    print("calling openai api...")
                     prompt = message.content.replace("!image", "").strip()
                     prompt = improve_image_prompt(prompt)
                     image_url = create_image(prompt)
