@@ -11,8 +11,8 @@ Users can give hillbot memories or facts about Dave using the `!davefacts` comma
 
 ## setup instructions
 1. Clone repo: `$ git clone https://github.com/cellwebb/discord-hillbot.git`
-2. Set your OpenAI API key and Discord bot token to the environment variables `$OPENAI_API_KEY` and `$DISCORD_HILLBOT_TOKEN`
-3. Create virtual environment: `$ python -m venv venv`
-4. Activate virtual environment: `$ source venv/bin/activate`
-5. Install python libraries: `$ pip install -r requirements.txt`
-6. Run app.py: `python app.py`
+1. Set your OpenAI API key and Discord bot token to the environment variables `$OPENAI_API_KEY` and `$DISCORD_HILLBOT_TOKEN`
+1. Create virtual environment: `$ python -m venv venv`
+1. Activate virtual environment: `$ source venv/bin/activate`
+1. Install python libraries: `$ pip install -r requirements.txt`
+1. Run app.py: `python app.py`
