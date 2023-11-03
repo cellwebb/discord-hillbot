@@ -27,7 +27,11 @@ def chunk_messages(messages: list[dict[str]]) -> list[dict[str]]:
                 messages[i]["content"] = "".join(tokenized_content[:2000])
                 messages.insert(
                     i + 1,
-                    {"role": messages[i]["role"], "content": tokenized_content[2000:]},
+                    {
+                        "role": messages[i]["role"],
+                        "name": messages[i]["name"] if "name" in messages[i] else None,
+                        "content": tokenized_content[2000:],
+                    },
                 )
         i += 1
     return messages
@@ -42,6 +46,7 @@ async def get_channel_history(client: object, channel: object) -> list[dict[str]
         channel_history.append(
             {
                 "role": "assistant" if prev_message.author == client.user else "user",
+                "name": prev_message.author.name,
                 "content": prev_message.content,
             }
         )
