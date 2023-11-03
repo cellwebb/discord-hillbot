@@ -66,7 +66,9 @@ async def on_message(message):
 
     if (
         "hillbot" in message.content.lower()
-        or client.user.mentioned_in(message)
+        or (
+            client.user.mentioned_in(message) and not message.mention_everyone
+        )  # mentions bot but not @everyone
         or not message.guild
     ):
         async with message.channel.typing():
