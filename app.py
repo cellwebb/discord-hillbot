@@ -81,7 +81,7 @@ async def on_message(message):
 
             messages = [{"role": "system", "content": system_msg + "\n" + davefacts}]
             messages.extend(conversation_history)
-            messages[-1]["content"] = "Reply in Dave's voice. " + messages[-1]["content"]
+            messages.append({"role": "system", "content": "Reply like Dave would!"})
             messages = chunk_messages(messages)
 
             for n_attempts in range(1, 6):
