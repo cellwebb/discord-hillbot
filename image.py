@@ -43,7 +43,9 @@ PROMPT_ENHANCERS = [
 
 def create_image(prompt: str = "cat") -> str:
     openai.api_key = os.getenv("OPENAI_API_KEY")
-    response = openai.Image.create(prompt=prompt, n=1, size="1024x1024")
+    response = openai.Image.create(
+        prompt=prompt, n=1, size="1024x1024", model="dall-e-3"
+    )
     image_url = response["data"][0]["url"]
     return image_url
 
