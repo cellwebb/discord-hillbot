@@ -37,6 +37,7 @@ PROMPT_ENHANCERS = [
     "photorealistic",
     "psychedelic",
     "vaporwave",
+    "LEGO",
 ]
 
 
