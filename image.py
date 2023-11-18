@@ -14,7 +14,6 @@ PROMPT_ENHANCERS = [
     "with fingers for hot dogs",
     "with hot dogs for fingers",
     "in the style of Frida Kahlo",
-    "in the style of Georgia O'Keeffe",
     "in the style of Jean-Michel Basquiat",
     "in the style of Moebius",
     "in the style of Pablo Picasso",
