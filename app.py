@@ -59,6 +59,7 @@ async def on_message(message):
                     time.sleep(wait_period)
                 except Exception as err:
                     await message.channel.send(err)
+                    await message.channel.send(f"Attempted prompt: {prompt}")
                     return
             else:
                 await message.channel.send("The server is busy! Please try again later!")
