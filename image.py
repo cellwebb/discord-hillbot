@@ -1,4 +1,4 @@
-import openai
+from openai import OpenAI
 import os
 import random
 import requests
@@ -39,12 +39,11 @@ PROMPT_ENHANCERS = [
     "LEGO",
 ]
 
+openai_client = OpenAI()
+
 
 def create_image(prompt: str = "cat") -> str:
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    response = openai.Image.create(
-        prompt=prompt, n=1, size="1024x1024", model="dall-e-3"
-    )
+    response = openai_client.images.generate(prompt=prompt, n=1, size="1024x1024", model="dall-e-3")
     image_url = response["data"][0]["url"]
     return image_url
 
