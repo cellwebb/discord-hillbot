@@ -3,7 +3,7 @@ import logging
 import os
 import time
 
-from openai.error import APIError, RateLimitError, ServiceUnavailableError
+from openai import APIError, RateLimitError
 
 from chat import get_channel_history, get_chatgpt_response, chunk_messages
 from image import create_image, improve_image_prompt, save_image_from_url
@@ -53,7 +53,7 @@ async def on_message(message):
                             f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n'  # noqa
                         )
                     return
-                except (APIError, RateLimitError, ServiceUnavailableError) as err:
+                except (APIError, RateLimitError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
                     time.sleep(wait_period)
@@ -91,7 +91,7 @@ async def on_message(message):
                     for i in range(0, len(response), DISCORD_CHARACTER_LIMIT):
                         await message.channel.send(response[i : i + DISCORD_CHARACTER_LIMIT])
                     return
-                except (APIError, RateLimitError, ServiceUnavailableError) as err:
+                except (APIError, RateLimitError) as err:
                     wait_period = 30 * n_attempts
                     await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
                     time.sleep(wait_period)
