@@ -29,7 +29,7 @@ def chunk_messages(messages: list[dict[str]]) -> list[dict[str]]:
                     i + 1,
                     {
                         "role": messages[i]["role"],
-                        "content": encoding.decode(tokenized_content[:2000]),
+                        "content": encoding.decode(tokenized_content[2000:]),
                     },
                 )
                 if "name" in messages[i]:
