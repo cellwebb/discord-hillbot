@@ -24,15 +24,16 @@ def chunk_messages(messages: list[dict[str]]) -> list[dict[str]]:
             tokenized_content = encoding.encode(messages[i]["content"])
             num_tokens = len(tokenized_content)
             if num_tokens > 2000:
-                messages[i]["content"] = "".join(tokenized_content[:2000])
+                messages[i]["content"] = "".join(encoding.decode(tokenized_content[:2000]))
                 messages.insert(
                     i + 1,
                     {
                         "role": messages[i]["role"],
-                        "name": messages[i]["name"] if "name" in messages[i] else "",
-                        "content": tokenized_content[2000:],
+                        "content": encoding.decode(tokenized_content[:2000]),
                     },
                 )
+                if "name" in messages[i]:
+                    messages[i + 1]["name"] = messages[i]["name"]
         i += 1
     return messages
 
