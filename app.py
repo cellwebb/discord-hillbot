@@ -78,15 +78,24 @@ async def on_message(message):
             with open("davefacts.txt") as f:
                 davefacts = f.read()
 
-            conversation_history = await get_channel_history(client, message.channel)
+            from config import CHANNEL_HISTORY_LIMIT, CHAT_MODEL, TEMPERATURE, MAX_COMPLETION_TOKENS
+
+            conversation_history = await get_channel_history(
+                client, message.channel, CHANNEL_HISTORY_LIMIT
+            )
 
             messages = [{"role": "system", "content": system_msg + "\n" + davefacts}]
             messages.extend(conversation_history)
-            messages.append({"role": "system", "content": "Reply like Dave would!"})
+            messages.append({"role": "system", "content": "REMEMBER TO REPLY LIKE DAVE WOULD!"})
 
             for n_attempts in range(1, 6):
                 try:
-                    response = get_chatgpt_response(messages)
+                    response = get_chatgpt_response(
+                        messages=messages,
+                        model=CHAT_MODEL,
+                        temperature=TEMPERATURE,
+                        max_completion_tokens=MAX_COMPLETION_TOKENS,
+                    )
                     for i in range(0, len(response), DISCORD_CHARACTER_LIMIT):
                         await message.channel.send(response[i : i + DISCORD_CHARACTER_LIMIT])
                     return
