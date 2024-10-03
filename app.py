@@ -5,7 +5,7 @@ import time
 
 from openai import APIError, RateLimitError
 
-from chat import get_channel_history, get_chatgpt_response, chunk_messages
+from chat import get_channel_history, get_chatgpt_response
 from image import create_image, improve_image_prompt, save_image_from_url
 
 
@@ -83,7 +83,6 @@ async def on_message(message):
             messages = [{"role": "system", "content": system_msg + "\n" + davefacts}]
             messages.extend(conversation_history)
             messages.append({"role": "system", "content": "Reply like Dave would!"})
-            messages = chunk_messages(messages)
 
             for n_attempts in range(1, 6):
                 try:
