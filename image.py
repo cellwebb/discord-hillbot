@@ -4,37 +4,6 @@ import random
 import requests
 import uuid
 
-
-PROMPT_ENHANCERS = [
-    "created by a talented robot artist named Hillbot",
-    "created by a talented human artist named Dave",
-    "made of meat",
-    "in the style of a biblical angel",
-    "unsettling image",
-    "with hot dogs for fingers",
-    "in the style of Frida Kahlo",
-    "in the style of Jean-Michel Basquiat",
-    "in the style of Moebius",
-    "in the style of Pablo Picasso",
-    "in the style of Salvador Dali",
-    "in the style of an ancient roman painting",
-    "children's drawing",
-    "scientific diagram",
-    "screenshot from Final Fantasy 7",
-    "in the style of Disney vintage animation",
-    "field journal line art",
-    "aesthetic",
-    "cinematic lighting",
-    "cyberpunk",
-    "fantasy",
-    "futuristic",
-    "masterpiece",
-    "photorealistic",
-    "psychedelic",
-    "vaporwave",
-    "LEGO",
-]
-
 openai_client = OpenAI()
 
 
@@ -45,7 +14,9 @@ def create_image(prompt: str = "cat") -> str:
 
 
 def improve_image_prompt(base_prompt: str) -> str:
-    prompt = f"{base_prompt}, {random.choice(PROMPT_ENHANCERS)}"
+    with open("./prompt_enhancers.txt", "r") as f:
+        prompt_enhancers = f.read().splitlines()
+    prompt = f"{base_prompt}, {random.choice(prompt_enhancers)}"
     return prompt
 
 
