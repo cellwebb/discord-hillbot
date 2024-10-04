@@ -1,0 +1,8 @@
+discord:
+  limit: 10 # Number of messages to fetch from Discord
+
+llm:
+  model: "gpt-4o-mini"
+  temperature: 1.45
+  max_completion_tokens: 1600
+  top_p: 0.993

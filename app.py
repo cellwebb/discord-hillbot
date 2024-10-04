@@ -2,6 +2,7 @@ import discord
 import logging
 import os
 import time
+import yaml
 
 from openai import APIError, RateLimitError
 
@@ -31,17 +32,20 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-
-    if message.content.startswith("!davefacts"):
-        with open("davefacts.txt", "a") as f:
-            new_fact = message.content.replace("!davefacts", "").strip()
-            f.write("- " + new_fact + "\n")
-        await message.channel.send("Thanks for telling me more about Dave!")
+    if message.mention_everyone:
         return
 
-    if message.content.startswith("!image"):
+    if message.content.startswith("!davefacts"):
         async with message.channel.typing():
-            for n_attempts in range(1, 6):
+            new_fact = message.content.replace("!davefacts", "").strip()
+            with open("davefacts.txt", "a") as f:
+                f.write("- " + new_fact + "\n")
+            await message.channel.send("Thanks for telling me more about Dave!")
+            return
+
+    if message.content.startswith("!image"):
+        for n_attempts in range(1, 6):
+            async with message.channel.typing():
                 try:
                     prompt = message.content.replace("!image", "").strip()
                     prompt = improve_image_prompt(prompt)
@@ -53,68 +57,71 @@ async def on_message(message):
                             f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n'  # noqa
                         )
                     return
-                except (APIError, RateLimitError) as err:
-                    wait_period = 30 * n_attempts
-                    await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
+
+                except RateLimitError as err:
+                    wait_period = 10 * n_attempts
+                    await message.channel.send(f"{err}\nTrying again in {wait_period} seconds!")
                     time.sleep(wait_period)
+
+                except APIError as err:
+                    await message.channel.send(
+                        f"{err}\nAttempted prompt: {prompt}\nTrying again..."
+                    )
+
                 except Exception as err:
-                    await message.channel.send(err)
-                    await message.channel.send(f"Attempted prompt: {prompt}")
+                    await message.channel.send(f"{err}\nAttempted prompt: {prompt}")
                     return
-            else:
-                await message.channel.send("The server is busy! Please try again later!")
-                return
+        else:
+            await message.channel.send("Please try again later!")
+            return
 
     if (
         "hillbot" in message.content.lower()
-        or (
-            client.user.mentioned_in(message) and not message.mention_everyone
-        )  # mentions bot but not @everyone
-        or not message.guild
+        or client.user.mentioned_in(message)
+        or not message.guild  # Direct message
     ):
+        with open("system.txt", "r") as f:
+            system_msg = f.read()
+        with open("davefacts.txt", "r") as f:
+            davefacts = f.read()
+        with open("config.yaml", "r") as f:
+            config = yaml.safe_load(f)
+
         async with message.channel.typing():
-            with open("system.txt") as f:
-                system_msg = f.read()
-            with open("davefacts.txt") as f:
-                davefacts = f.read()
-
-            from config import (
-                CHANNEL_HISTORY_LIMIT,
-                CHAT_MODEL,
-                TEMPERATURE,
-                MAX_COMPLETION_TOKENS,
-                TOP_P,
-            )
-
             conversation_history = await get_channel_history(
-                client, message.channel, CHANNEL_HISTORY_LIMIT
+                client, message.channel, **config["discord"]
             )
 
             messages = [{"role": "system", "content": system_msg + "\n" + davefacts}]
             messages.extend(conversation_history)
-            messages.append({"role": "system", "content": "REMEMBER TO REPLY LIKE DAVE WOULD!"})
+            messages.append(
+                {
+                    "role": "system",
+                    "content": "REMEMBER YOU'RE ON A DISCORD SERVER! REMEMBER TO KEEP YOUR MESSAGES GOOFY BUT DON'T RAMBLE! REMEMBER TO REPLY LIKE DAVE WOULD! REMEMBER YOUR DAVEFACTS! REMEMBER TO BE DAVE! 🌟",  # noqa
+                }
+            )
 
             for n_attempts in range(1, 6):
                 try:
-                    response = get_chatgpt_response(
-                        messages=messages,
-                        model=CHAT_MODEL,
-                        temperature=TEMPERATURE,
-                        max_completion_tokens=MAX_COMPLETION_TOKENS,
-                        top_p=TOP_P,
-                    )
+                    response = get_chatgpt_response(messages=messages, **config["llm"])
+
                     for i in range(0, len(response), DISCORD_CHARACTER_LIMIT):
                         await message.channel.send(response[i : i + DISCORD_CHARACTER_LIMIT])
                     return
-                except (APIError, RateLimitError) as err:
-                    wait_period = 30 * n_attempts
-                    await message.channel.send(f"{err} I'll try again in {wait_period} seconds!")
+
+                except RateLimitError as err:
+                    wait_period = 10 * n_attempts
+                    await message.channel.send(f"{err}\nI'll try again in {wait_period} seconds!")
                     time.sleep(wait_period)
+
+                except APIError as err:
+                    await message.channel.send(f"{err}\n Trying again...")
+
                 except Exception as err:
                     await message.channel.send(err)
                     return
             else:
-                await message.channel.send("The server is busy! Please try again later!")
+                await message.channel.send("Please try again later!")
                 return
 
 
