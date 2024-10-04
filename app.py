@@ -78,7 +78,13 @@ async def on_message(message):
             with open("davefacts.txt") as f:
                 davefacts = f.read()
 
-            from config import CHANNEL_HISTORY_LIMIT, CHAT_MODEL, TEMPERATURE, MAX_COMPLETION_TOKENS
+            from config import (
+                CHANNEL_HISTORY_LIMIT,
+                CHAT_MODEL,
+                TEMPERATURE,
+                MAX_COMPLETION_TOKENS,
+                TOP_P,
+            )
 
             conversation_history = await get_channel_history(
                 client, message.channel, CHANNEL_HISTORY_LIMIT
@@ -95,6 +101,7 @@ async def on_message(message):
                         model=CHAT_MODEL,
                         temperature=TEMPERATURE,
                         max_completion_tokens=MAX_COMPLETION_TOKENS,
+                        top_p=TOP_P,
                     )
                     for i in range(0, len(response), DISCORD_CHARACTER_LIMIT):
                         await message.channel.send(response[i : i + DISCORD_CHARACTER_LIMIT])
