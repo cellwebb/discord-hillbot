@@ -1,13 +1,15 @@
+import asyncio
 import discord
 import logging
 import os
+import random
 import time
 import yaml
 
-from openai import APIError, RateLimitError
+from openai import AsyncOpenAI, APIError, RateLimitError
 
-from chat import get_channel_history, get_chatgpt_response
-from image import create_image, improve_image_prompt, save_image_from_url
+from chat import get_channel_history  # , get_chatgpt_response
+from image import save_image_from_url
 
 
 DISCORD_CHARACTER_LIMIT = 2000
@@ -16,6 +18,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = discord.Client(intents=intents)
+openai_client = AsyncOpenAI()
 
 
 @client.event
@@ -43,7 +46,17 @@ async def on_message(message):
             await message.channel.send("Thanks for telling me more about Dave!")
             return
 
+    if message.content.startswith("!prompt_enhancer"):
+        async with message.channel.typing():
+            new_prompt_enhancer = message.content.replace("!prompt_enhancer", "").strip()
+            with open("prompt_enhancers.txt", "a") as f:
+                f.write(new_prompt_enhancer + "\n")
+            await message.channel.send("Thanks for telling me more about Dave!")
+            return
+
     if message.content.startswith("!image"):
+        with open("prompt_enhancers.txt", "r") as f:
+            prompt_enhancers = f.readlines()
         with open("config.yaml", "r") as f:
             config = yaml.safe_load(f)
 
@@ -51,10 +64,16 @@ async def on_message(message):
             async with message.channel.typing():
                 try:
                     prompt = message.content.replace("!image", "").strip()
-                    prompt = improve_image_prompt(prompt)
-                    image_url = create_image(prompt, **config["image_model"])
+                    prompt = f"{prompt}, {random.choice(prompt_enhancers)}"
+
+                    response = await openai_client.images.generate(
+                        prompt=prompt, **config["image_model"]
+                    )
+                    image_url = response.data[0].url
                     filename = save_image_from_url(image_url)
+
                     await message.channel.send(prompt, file=discord.File(filename))
+
                     with open("image_logs.txt", "a") as f:
                         f.write(
                             f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n'  # noqa
@@ -64,7 +83,7 @@ async def on_message(message):
                 except RateLimitError as err:
                     wait_period = 10 * n_attempts
                     await message.channel.send(f"{err}\nTrying again in {wait_period} seconds!")
-                    time.sleep(wait_period)
+                    await asyncio.sleep(wait_period)
 
                 except APIError as err:
                     await message.channel.send(
@@ -106,16 +125,19 @@ async def on_message(message):
 
             for n_attempts in range(1, 6):
                 try:
-                    response = get_chatgpt_response(messages=messages, **config["llm"])
+                    response = await openai_client.chat.completions.create(
+                        messages=messages, **config["llm"]
+                    )
+                    response_text = response.choices[0].message.content
 
-                    for i in range(0, len(response), DISCORD_CHARACTER_LIMIT):
-                        await message.channel.send(response[i : i + DISCORD_CHARACTER_LIMIT])
+                    for i in range(0, len(response_text), DISCORD_CHARACTER_LIMIT):
+                        await message.channel.send(response_text[i : i + DISCORD_CHARACTER_LIMIT])
                     return
 
                 except RateLimitError as err:
                     wait_period = 10 * n_attempts
                     await message.channel.send(f"{err}\nI'll try again in {wait_period} seconds!")
-                    time.sleep(wait_period)
+                    await asyncio.sleep(wait_period)
 
                 except APIError as err:
                     await message.channel.send(f"{err}\n Trying again...")

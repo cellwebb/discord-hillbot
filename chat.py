@@ -1,16 +1,16 @@
-from openai import OpenAI
+import openai
 
-openai_client = OpenAI()
+openai_client = openai.AsyncOpenAI()
 
 
-def get_chatgpt_response(
+async def get_chatgpt_response(
     messages: list[dict[str]],
     model: str,
     temperature: int,
     max_completion_tokens: int,
     top_p: float,
 ) -> str:
-    chat_completion = openai_client.chat.completions.create(
+    chat_completion = await openai_client.chat.completions.create(
         model=model,
         messages=messages,
         temperature=temperature,
