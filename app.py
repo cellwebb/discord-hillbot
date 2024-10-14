@@ -1,15 +1,16 @@
 import asyncio
+import base64
 import discord
 import logging
 import os
 import random
 import time
+import uuid
 import yaml
 
 from openai import AsyncOpenAI, APIError, RateLimitError
 
-from chat import get_channel_history  # , get_chatgpt_response
-from image import save_image_from_url
+from chat import get_channel_history
 
 
 DISCORD_CHARACTER_LIMIT = 2000
@@ -69,15 +70,18 @@ async def on_message(message):
                     response = await openai_client.images.generate(
                         prompt=prompt, **config["image_model"]
                     )
-                    image_url = response.data[0].url
-                    revised_prompt = response.data[0].revised_prompt
-                    filename = save_image_from_url(image_url)
+                    filename = f"images/{str(uuid.uuid4().hex)}.png"
+                    with open(filename, "wb") as f:
+                        f.write(base64.standard_b64decode(response.data[0].b64_json))
 
                     await message.channel.send(prompt, file=discord.File(filename))
 
                     with open("image_logs.txt", "a") as f:
+                        revised_prompt = response.data[0].revised_prompt
                         f.write(
-                            f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}, Revised Prompt:{revised_prompt}\n'  # noqa
+                            f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
+                            f"Prompt: {prompt}, Filename: {filename}, "
+                            f"Revised Prompt:{revised_prompt}\n"
                         )
                     return
 
