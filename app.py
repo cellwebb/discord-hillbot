@@ -65,11 +65,12 @@ async def on_message(message):
             async with message.channel.typing():
                 try:
                     prompt = message.content.replace("!image", "").strip()
-                    prompt = f"{prompt}, {random.choice(prompt_enhancers)}"
+                    prompt = f"{prompt}, {random.choice(prompt_enhancers)}"[:-1]
 
                     response = await openai_client.images.generate(
                         prompt=prompt, **config["image_model"]
                     )
+
                     filename = f"images/{str(uuid.uuid4().hex)}.png"
                     with open(filename, "wb") as f:
                         f.write(base64.standard_b64decode(response.data[0].b64_json))
