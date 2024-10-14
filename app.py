@@ -61,11 +61,12 @@ async def on_message(message):
         with open("config.yaml", "r") as f:
             config = yaml.safe_load(f)
 
+        original_prompt = message.content.replace("!image", "").strip()
+
         for n_attempts in range(1, 6):
             async with message.channel.typing():
                 try:
-                    prompt = message.content.replace("!image", "").strip()
-                    prompt = f"{prompt}, {random.choice(prompt_enhancers)}"[:-1]
+                    prompt = f"{original_prompt}, {random.choice(prompt_enhancers)}"[:-1]
 
                     response = await openai_client.images.generate(
                         prompt=prompt, **config["image_model"]
@@ -78,11 +79,10 @@ async def on_message(message):
                     await message.channel.send(prompt, file=discord.File(filename))
 
                     with open("image_logs.txt", "a") as f:
-                        revised_prompt = response.data[0].revised_prompt
                         f.write(
                             f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
                             f"Prompt: {prompt}, Filename: {filename}, "
-                            f"Revised Prompt:{revised_prompt}\n"
+                            f"Revised Prompt:{response.data[0].revised_prompt}\n"
                         )
                     return
 
