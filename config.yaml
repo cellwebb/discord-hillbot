@@ -6,3 +6,7 @@ llm:
   temperature: 1.45
   max_completion_tokens: 1600
   top_p: 0.993
+
+image_model:
+  model: "dall-e-3"
+  size: "1024x1024"
