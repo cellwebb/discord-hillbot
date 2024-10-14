@@ -70,13 +70,14 @@ async def on_message(message):
                         prompt=prompt, **config["image_model"]
                     )
                     image_url = response.data[0].url
+                    revised_prompt = response.data[0].revised_prompt
                     filename = save_image_from_url(image_url)
 
                     await message.channel.send(prompt, file=discord.File(filename))
 
                     with open("image_logs.txt", "a") as f:
                         f.write(
-                            f'Datetime: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}\n'  # noqa
+                            f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, Prompt: {prompt}, Filename: {filename}, Revised Prompt:{revised_prompt}\n'  # noqa
                         )
                     return
 
@@ -128,10 +129,10 @@ async def on_message(message):
                     response = await openai_client.chat.completions.create(
                         messages=messages, **config["llm"]
                     )
-                    response_text = response.choices[0].message.content
+                    reply = response.choices[0].message.content
 
-                    for i in range(0, len(response_text), DISCORD_CHARACTER_LIMIT):
-                        await message.channel.send(response_text[i : i + DISCORD_CHARACTER_LIMIT])
+                    for i in range(0, len(reply), DISCORD_CHARACTER_LIMIT):
+                        await message.channel.send(reply[i : i + DISCORD_CHARACTER_LIMIT])
                     return
 
                 except RateLimitError as err:
