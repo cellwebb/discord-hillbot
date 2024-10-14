@@ -7,8 +7,8 @@ import uuid
 openai_client = OpenAI()
 
 
-def create_image(prompt: str = "cat") -> str:
-    response = openai_client.images.generate(prompt=prompt, n=1, size="1024x1024", model="dall-e-3")
+def create_image(prompt: str, model: str, size: str) -> str:
+    response = openai_client.images.generate(prompt=prompt, model=model, size=size)
     image_url = response.data[0].url
     return image_url
 

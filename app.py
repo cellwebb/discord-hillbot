@@ -44,12 +44,15 @@ async def on_message(message):
             return
 
     if message.content.startswith("!image"):
+        with open("config.yaml", "r") as f:
+            config = yaml.safe_load(f)
+
         for n_attempts in range(1, 6):
             async with message.channel.typing():
                 try:
                     prompt = message.content.replace("!image", "").strip()
                     prompt = improve_image_prompt(prompt)
-                    image_url = create_image(prompt)
+                    image_url = create_image(prompt, **config["image_model"])
                     filename = save_image_from_url(image_url)
                     await message.channel.send(prompt, file=discord.File(filename))
                     with open("image_logs.txt", "a") as f:
