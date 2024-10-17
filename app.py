@@ -52,7 +52,7 @@ async def on_message(message):
             new_prompt_enhancer = message.content.replace("!prompt_enhancer", "").strip()
             with open("prompt_enhancers.txt", "a") as f:
                 f.write(new_prompt_enhancer + "\n")
-            await message.channel.send("Thanks for telling me more about Dave!")
+            await message.channel.send("Thanks I've added it to the list!")
             return
 
     if message.content.startswith("!image"):
