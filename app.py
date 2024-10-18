@@ -8,6 +8,8 @@ import time
 import uuid
 import yaml
 
+from PIL import Image
+
 from openai import AsyncOpenAI, APIError, RateLimitError
 
 from chat import get_channel_history
@@ -102,6 +104,47 @@ async def on_message(message):
         else:
             await message.channel.send("Please try again later!")
             return
+
+    if message.channel.name == "hillbot-draws" and message.attachments:
+        try:
+            for attachment in message.attachments:
+                if not attachment.content_type.startswith("image"):
+                    continue
+
+                await message.channel.send("Nice image! Let me redraw it for you!")
+
+                async with message.channel.typing():
+
+                    filetype = attachment.filename.split(".")[-1]
+                    os.makedirs("images/variations/originals", exist_ok=True)
+                    original_filename = (
+                        f"images/variations/originals/{str(uuid.uuid4().hex)}.{filetype}"
+                    )
+                    await attachment.save(original_filename)
+
+                    with Image.open(original_filename) as img:
+                        img.thumbnail((1024, 1024))
+                        converted_filename = original_filename.replace(filetype, "png")
+                        img.save(converted_filename)
+
+                    response = await openai_client.images.create_variation(
+                        image=open(converted_filename, "rb"), response_format="b64_json"
+                    )
+
+                    variation_filename = f"images/variations/{str(uuid.uuid4().hex)}.png"
+                    with open(variation_filename, "wb") as f:
+                        f.write(base64.standard_b64decode(response.data[0].b64_json))
+
+                    await message.channel.send(":D", file=discord.File(variation_filename))
+
+                    with open("image_logs.txt", "a") as f:
+                        f.write(
+                            f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
+                            f"Variation of: {original_filename}, Filename: {variation_filename}\n"
+                        )
+        except Exception as err:
+            await message.channel.send(err)
+        return
 
     if (
         "hillbot" in message.content.lower()
