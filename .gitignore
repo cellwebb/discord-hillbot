@@ -182,3 +182,5 @@ image_logs.txt
 .DS_Store
 aws_connect_notes.txt
 Untitled.ipynb
+z_*.py
+hillbot.service
