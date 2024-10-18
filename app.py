@@ -146,6 +146,39 @@ async def on_message(message):
             await message.channel.send(err)
         return
 
+    if message.channel.name == "hillbot-draws" and (
+        message.content.startswith("!again") or message.content.lower().startswith("again")
+    ):
+        await message.channel.send("Let's go deeper!")
+
+        try:
+            files = os.listdir("images/variations")
+            files.sort(key=lambda x: os.path.getmtime(f"images/variations/{x}"))
+            most_recent_variation = files[-1]
+
+            async with message.channel.typing():
+                response = await openai_client.images.create_variation(
+                    image=open(f"images/variations/{most_recent_variation}", "rb"),
+                    response_format="b64_json",
+                )
+
+                variation_filename = f"images/variations/{str(uuid.uuid4().hex)}.png"
+                with open(variation_filename, "wb") as f:
+                    f.write(base64.standard_b64decode(response.data[0].b64_json))
+
+                await message.channel.send(":D", file=discord.File(variation_filename))
+
+        except Exception as err:
+            await message.channel.send(err)
+            return
+
+        with open("image_logs.txt", "a") as f:
+            f.write(
+                f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
+                f"Variation of: {most_recent_variation}, Filename: {variation_filename}\n"
+            )
+        return
+
     if (
         "hillbot" in message.content.lower()
         or client.user.mentioned_in(message)
