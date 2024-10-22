@@ -105,7 +105,11 @@ async def on_message(message):
             await message.channel.send("Please try again later!")
             return
 
-    if message.channel.name == "hillbot-draws" and message.attachments:
+    if (
+        hasattr(message.channel, "name")
+        and message.channel.name == "hillbot-draws"
+        and message.attachments
+    ):
         try:
             for attachment in message.attachments:
                 if not attachment.content_type.startswith("image"):
@@ -146,11 +150,15 @@ async def on_message(message):
             await message.channel.send(err)
         return
 
-    if message.channel.name == "hillbot-draws" and (
-        message.content.lower().startswith("!again")
-        or message.content.lower().startswith("again")
-        or message.content.lower().startswith("more")
-        or message.content.lower().startswith("deeper")
+    if (
+        hasattr(message.channel, "name")
+        and message.channel.name == "hillbot-draws"
+        and (
+            message.content.lower().startswith("!again")
+            or message.content.lower().startswith("again")
+            or message.content.lower().startswith("more")
+            or message.content.lower().startswith("deeper")
+        )
     ):
         await message.channel.send("Let's go deeper!")
 
