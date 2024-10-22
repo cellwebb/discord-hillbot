@@ -12,7 +12,7 @@ from PIL import Image
 
 from openai import AsyncOpenAI, APIError, RateLimitError
 
-from chat import get_channel_history
+from utils import get_channel_history
 
 
 DISCORD_CHARACTER_LIMIT = 2000
