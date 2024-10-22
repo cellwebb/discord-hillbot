@@ -36,11 +36,6 @@ async def on_message(message):
             f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}\n'  # noqa
         )
 
-    if message.author == client.user:
-        return
-    if message.mention_everyone:
-        return
-
     if message.content.startswith("!davefacts"):
         add_dave_fact(message)
         return
@@ -96,6 +91,11 @@ async def on_message(message):
         else:
             await message.channel.send("Please try again later!")
             return
+
+    if message.author == client.user:
+        return
+    if message.mention_everyone:
+        return
 
     if (
         hasattr(message.channel, "name")
