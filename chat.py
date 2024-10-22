@@ -21,20 +21,48 @@ async def get_chatgpt_response(
     return response
 
 
-async def get_channel_history(client: object, channel: object, limit: int) -> list[dict[str]]:
+async def get_channel_history(
+    client: object, channel: object, message_limit: int, image_limit: int
+) -> list[dict[str]]:
     """Pulls messages from discord channel and formats for OpenAI API."""
-    channel_history_generator = channel.history(limit=limit)
+    channel_history_generator = channel.history(limit=message_limit)
+
+    image_count = 0
 
     channel_history = []
     async for message in channel_history_generator:
-        channel_history.append(
-            {
-                "role": "assistant" if message.author == client.user else "user",
-                "name": message.author.name.replace(".", "-"),
-                "content": message.content,
-            }
-        )
+        formatted_message = {
+            "role": "assistant" if message.author == client.user else "user",
+            "name": message.author.name.replace(".", "-"),
+            "content": message.content,
+        }
 
+        if (
+            image_count < image_limit
+            and message.attachments
+            and message.attachments[0].content_type.startswith("image")
+        ):
+            image_count += 1
+
+            if formatted_message["role"] == "user":
+                formatted_message["content"] = [
+                    {"type": "text", "text": formatted_message["content"]},
+                    {"type": "image_url", "image_url": {"url": message.attachments[0].url}},
+                ]
+            else:
+                channel_history.append(
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": message.attachments[0].url},
+                            }
+                        ],
+                    }
+                )
+
+        channel_history.append(formatted_message)
     channel_history.reverse()  # Reverse to put messages in chronological order
 
     return channel_history

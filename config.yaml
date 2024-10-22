@@ -1,5 +1,6 @@
 discord:
-  limit: 10 # Number of messages to fetch from Discord
+  message_limit: 20
+  image_limit: 5
 
 llm:
   model: "gpt-4o-mini"
