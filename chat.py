@@ -1,26 +1,3 @@
-import openai
-
-openai_client = openai.AsyncOpenAI()
-
-
-async def get_chatgpt_response(
-    messages: list[dict[str]],
-    model: str,
-    temperature: int,
-    max_completion_tokens: int,
-    top_p: float,
-) -> str:
-    chat_completion = await openai_client.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=temperature,
-        max_completion_tokens=max_completion_tokens,
-        top_p=top_p,
-    )
-    response = chat_completion.choices[0].message.content
-    return response
-
-
 async def get_channel_history(
     client: object, channel: object, message_limit: int, image_limit: int
 ) -> list[dict[str]]:
