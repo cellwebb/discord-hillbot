@@ -53,3 +53,21 @@ async def get_channel_history(
     channel_history.reverse()
 
     return channel_history
+
+
+async def add_dave_fact(message: object) -> None:
+    async with message.channel.typing():
+        new_fact = message.content.replace("!davefacts", "").strip()
+        with open("resources/davefacts.txt", "a") as f:
+            f.write("- " + new_fact + "\n")
+    await message.channel.send("Thanks for telling me more about Dave!")
+    return
+
+
+async def add_prompt_enhancer(message: object) -> None:
+    async with message.channel.typing():
+        new_prompt_enhancer = message.content.replace("!prompt_enhancer", "").strip()
+        with open("resources/prompt_enhancers.txt", "a") as f:
+            f.write(new_prompt_enhancer + "\n")
+    await message.channel.send("Thanks I've added it to the list!")
+    return

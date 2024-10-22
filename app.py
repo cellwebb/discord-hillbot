@@ -12,7 +12,7 @@ from PIL import Image
 
 from openai import AsyncOpenAI, APIError, RateLimitError
 
-from utils import get_channel_history
+from utils import get_channel_history, add_dave_fact, add_prompt_enhancer
 
 
 DISCORD_CHARACTER_LIMIT = 2000
@@ -42,20 +42,12 @@ async def on_message(message):
         return
 
     if message.content.startswith("!davefacts"):
-        async with message.channel.typing():
-            new_fact = message.content.replace("!davefacts", "").strip()
-            with open("resources/davefacts.txt", "a") as f:
-                f.write("- " + new_fact + "\n")
-            await message.channel.send("Thanks for telling me more about Dave!")
-            return
+        add_dave_fact(message)
+        return
 
     if message.content.startswith("!prompt_enhancer"):
-        async with message.channel.typing():
-            new_prompt_enhancer = message.content.replace("!prompt_enhancer", "").strip()
-            with open("resources/prompt_enhancers.txt", "a") as f:
-                f.write(new_prompt_enhancer + "\n")
-            await message.channel.send("Thanks I've added it to the list!")
-            return
+        add_prompt_enhancer(message)
+        return
 
     if message.content.startswith("!image"):
         with open("resources/prompt_enhancers.txt", "r") as f:
