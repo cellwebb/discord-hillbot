@@ -147,7 +147,10 @@ async def on_message(message):
         return
 
     if message.channel.name == "hillbot-draws" and (
-        message.content.startswith("!again") or message.content.lower().startswith("again")
+        message.content.lower().startswith("!again")
+        or message.content.lower().startswith("again")
+        or message.content.lower().startswith("more")
+        or message.content.lower().startswith("deeper")
     ):
         await message.channel.send("Let's go deeper!")
 
