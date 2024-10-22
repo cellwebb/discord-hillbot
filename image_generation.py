@@ -13,6 +13,8 @@ openai_client = AsyncOpenAI()
 
 
 async def generate_image(message: object) -> None:
+    """Generate an image based on a prompt."""
+
     with open("resources/prompt_enhancers.txt", "r") as f:
         prompt_enhancers = f.readlines()
     with open("config.yaml", "r") as f:
@@ -60,6 +62,8 @@ async def generate_image(message: object) -> None:
 
 
 async def create_variation(message: object, attachment: object) -> None:
+    """Create a variation of an image."""
+
     await message.channel.send("Nice image! Let me redraw it for you!")
 
     async with message.channel.typing():
@@ -93,6 +97,8 @@ async def create_variation(message: object, attachment: object) -> None:
 
 
 async def go_deeper(message: object) -> None:
+    """Create a variation of the most recent variation."""
+
     await message.channel.send("Let's go deeper!")
 
     files = os.listdir("images/variations")
