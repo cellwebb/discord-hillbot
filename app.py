@@ -44,7 +44,7 @@ async def on_message(message):
     if message.content.startswith("!davefacts"):
         async with message.channel.typing():
             new_fact = message.content.replace("!davefacts", "").strip()
-            with open("davefacts.txt", "a") as f:
+            with open("resources/davefacts.txt", "a") as f:
                 f.write("- " + new_fact + "\n")
             await message.channel.send("Thanks for telling me more about Dave!")
             return
@@ -52,13 +52,13 @@ async def on_message(message):
     if message.content.startswith("!prompt_enhancer"):
         async with message.channel.typing():
             new_prompt_enhancer = message.content.replace("!prompt_enhancer", "").strip()
-            with open("prompt_enhancers.txt", "a") as f:
+            with open("resources/prompt_enhancers.txt", "a") as f:
                 f.write(new_prompt_enhancer + "\n")
             await message.channel.send("Thanks I've added it to the list!")
             return
 
     if message.content.startswith("!image"):
-        with open("prompt_enhancers.txt", "r") as f:
+        with open("resources/prompt_enhancers.txt", "r") as f:
             prompt_enhancers = f.readlines()
         with open("config.yaml", "r") as f:
             config = yaml.safe_load(f)
@@ -74,13 +74,13 @@ async def on_message(message):
                         prompt=prompt, **config["image_model"]
                     )
 
-                    filename = f"images/{str(uuid.uuid4().hex)}.png"
+                    filename = f"images/creations/{str(uuid.uuid4().hex)}.png"
                     with open(filename, "wb") as f:
                         f.write(base64.standard_b64decode(response.data[0].b64_json))
 
                     await message.channel.send(prompt, file=discord.File(filename))
 
-                    with open("image_logs.txt", "a") as f:
+                    with open("images/image_logs.txt", "a") as f:
                         f.write(
                             f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
                             f"Prompt: {prompt}, Filename: {filename}, "
@@ -141,7 +141,7 @@ async def on_message(message):
 
                     await message.channel.send(":D", file=discord.File(variation_filename))
 
-                    with open("image_logs.txt", "a") as f:
+                    with open("images/image_logs.txt", "a") as f:
                         f.write(
                             f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
                             f"Variation of: {original_filename}, Filename: {variation_filename}\n"
@@ -183,7 +183,7 @@ async def on_message(message):
             await message.channel.send(err)
             return
 
-        with open("image_logs.txt", "a") as f:
+        with open("images/image_logs.txt", "a") as f:
             f.write(
                 f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
                 f"Variation of: {most_recent_variation}, Filename: {variation_filename}\n"
@@ -195,9 +195,9 @@ async def on_message(message):
         or client.user.mentioned_in(message)
         or not message.guild  # Direct message
     ):
-        with open("system.txt", "r") as f:
+        with open("resources/system.txt", "r") as f:
             system_msg = f.read()
-        with open("davefacts.txt", "r") as f:
+        with open("resources/davefacts.txt", "r") as f:
             davefacts = f.read()
         with open("config.yaml", "r") as f:
             config = yaml.safe_load(f)
