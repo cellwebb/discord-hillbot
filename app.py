@@ -8,7 +8,7 @@ import yaml
 from openai import AsyncOpenAI, APIError, RateLimitError
 
 from image_generation import generate_image, create_variation, go_deeper
-from utils import get_channel_history, add_dave_fact, add_prompt_enhancer
+from utils import get_channel_history, add_dave_fact, add_prompt_enhancer, message_contains_image
 
 
 DISCORD_CHARACTER_LIMIT = 2000
@@ -50,7 +50,7 @@ async def on_message(message):
     if (
         hasattr(message.channel, "name")
         and message.channel.name == "hillbot-draws"
-        and message.attachments
+        and message_contains_image(message)
     ):
         try:
             for attachment in message.attachments:
