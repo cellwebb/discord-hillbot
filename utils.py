@@ -71,3 +71,12 @@ async def add_prompt_enhancer(message: object) -> None:
             f.write(new_prompt_enhancer + "\n")
     await message.channel.send("Thanks I've added it to the list!")
     return
+
+
+def message_contains_image(message: object) -> bool:
+    """Check if a message contains an image."""
+    if message.attachments:
+        for x in message.attachments:
+            if x.content_type.startswith("image"):
+                return True
+    return False
