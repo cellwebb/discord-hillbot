@@ -1,5 +1,5 @@
 async def get_channel_history(
-    client: object, channel: object, message_limit: int, image_limit: int
+    client: object, channel: object, message_limit: int
 ) -> list[dict[str]]:
     """Pulls messages from discord channel and formats for OpenAI API.
 
@@ -10,45 +10,31 @@ async def get_channel_history(
     TODO:
     - Add support for replies.
     - Add support for embeds.
-    - Add support for messages with multiple attachments.
+    - Add support for other attachment types.
     """
 
     channel_history = []
-    image_count = 0
 
     channel_history_generator = channel.history(limit=message_limit)
     async for message in channel_history_generator:
-        formatted_message = {
-            "role": "assistant" if message.author == client.user else "user",
-            "name": message.author.name.replace(".", "-"),
-            "content": [{"type": "text", "text": message.content}],
-        }
+        role = "assistant" if message.author == client.user else "user"
+        name = message.author.name.replace(".", "-")
+        text_json = {"type": "text", "text": message.content}
 
-        if (
-            image_count < image_limit
-            and message.attachments
-            and message.attachments[0].content_type.startswith("image")
-        ):
-            image_count += 1
-            if formatted_message["role"] == "user":
-                formatted_message["content"].append(
-                    {"type": "image_url", "image_url": {"url": message.attachments[0].url}},
-                )
-            else:
-                channel_history.append(
-                    {
-                        "role": "user",
-                        "name": message.author.name.replace(".", "-"),
-                        "content": [
-                            {
-                                "type": "image_url",
-                                "image_url": {"url": message.attachments[0].url},
-                            }
-                        ],
-                    }
-                )
+        image_content = []
+        if message.attachments:
+            for attachment in message.attachments:
+                if attachment.content_type.startswith("image"):
+                    image_json = {"type": "image_url", "image_url": {"url": attachment.url}}
+                    image_content.append(image_json)
 
-        channel_history.append(formatted_message)
+        if role == "user":
+            content = [text_json, *image_content]
+            channel_history.append({"role": role, "name": name, "content": content})
+        else:
+            if image_content:
+                channel_history.append({"role": "user", "name": name, "content": image_content})
+            channel_history.append({"role": role, "name": name, "content": text_json})
 
     channel_history.reverse()
 
