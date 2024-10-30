@@ -1,6 +1,5 @@
 discord:
   message_limit: 20
-  image_limit: 5
 
 llm:
   model: "gpt-4o-mini"
