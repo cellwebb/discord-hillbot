@@ -99,28 +99,34 @@ async def create_variation(message: object, attachment: object) -> None:
 async def go_deeper(message: object) -> None:
     """Create a variation of the most recent variation."""
 
-    await message.channel.send("Let's go deeper!")
+    if message.content[-1].isdigit() and int(message.content[-1]) > 1:
+        n = int(message.content[-1])
+    else:
+        n = 1
 
-    files = os.listdir("images/variations")
-    files.sort(key=lambda x: os.path.getmtime(f"images/variations/{x}"))
-    most_recent_variation = files[-1]
+    for _ in range(n):
+        await message.channel.send("Let's go deeper!")
 
-    async with message.channel.typing():
-        response = await openai_client.images.create_variation(
-            image=open(f"images/variations/{most_recent_variation}", "rb"),
-            response_format="b64_json",
-        )
+        files = os.listdir("images/variations")
+        files.sort(key=lambda x: os.path.getmtime(f"images/variations/{x}"))
+        most_recent_variation = files[-1]
 
-        variation_filename = f"images/variations/{str(uuid.uuid4().hex)}.png"
-        with open(variation_filename, "wb") as f:
-            f.write(base64.standard_b64decode(response.data[0].b64_json))
+        async with message.channel.typing():
+            response = await openai_client.images.create_variation(
+                image=open(f"images/variations/{most_recent_variation}", "rb"),
+                response_format="b64_json",
+            )
 
-        await message.channel.send(":D", file=discord.File(variation_filename))
+            variation_filename = f"images/variations/{str(uuid.uuid4().hex)}.png"
+            with open(variation_filename, "wb") as f:
+                f.write(base64.standard_b64decode(response.data[0].b64_json))
 
-    with open("images/image_logs.txt", "a") as f:
-        f.write(
-            f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
-            f"Variation of: {most_recent_variation}, Filename: {variation_filename}\n"
-        )
+            await message.channel.send(":D", file=discord.File(variation_filename))
+
+        with open("images/image_logs.txt", "a") as f:
+            f.write(
+                f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
+                f"Variation of: {most_recent_variation}, Filename: {variation_filename}\n"
+            )
 
     return
