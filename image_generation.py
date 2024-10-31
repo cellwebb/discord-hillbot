@@ -20,7 +20,12 @@ async def generate_image(message: object) -> None:
     with open("config.yaml", "r") as f:
         config = yaml.safe_load(f)
 
-    original_prompt = message.content.strip()
+    if message.content.strip().startswith("!image"):
+        original_prompt = message.content.replace("!image", "", 1).strip()
+    elif message.content.strip().startswith("!img"):
+        original_prompt = message.content.replace("!img", "", 1).strip()
+    else:
+        original_prompt = message.content.replace("!i", "", 1).strip()
 
     for n_attempts in range(1, 6):
         async with message.channel.typing():
