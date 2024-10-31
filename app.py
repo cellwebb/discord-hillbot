@@ -38,8 +38,13 @@ async def on_message(message):
     if message.content.startswith("!prompt_enhancer"):
         add_prompt_enhancer(message)
         return
-    if message.content.startswith("!image"):
-        await generate_image(message)
+    if message.content.startswith("!i"):
+        if message.content.strip().startswith("!image"):
+            await generate_image(message.content.replace("!image", "", 1).strip())
+        elif message.content.strip().startswith("!img"):
+            await generate_image(message.content.replace("!img", "", 1).strip())
+        else:
+            await generate_image(message.content.replace("!i", "", 1).strip())
         return
 
     if message.author == client.user:
