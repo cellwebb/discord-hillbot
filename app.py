@@ -129,6 +129,6 @@ async def on_message(message):
                 return
 
 
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+# handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 token = os.getenv("DISCORD_HILLBOT_TOKEN")
-client.run(token, log_handler=handler)
+client.run(token)  # , log_handler=handler)
