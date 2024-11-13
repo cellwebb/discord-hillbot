@@ -38,7 +38,7 @@ async def on_message(message):
     if message.content.startswith("!prompt_enhancer"):
         add_prompt_enhancer(message)
         return
-    if message.content.startswith("!i"):
+    if message.content.lower().startswith("!i"):
         await generate_image(message)
         return
 
@@ -52,10 +52,12 @@ async def on_message(message):
         and message.channel.name == "hillbot-draws"
         and message_contains_image(message)
     ):
+        with open("config.yaml", "r") as f:
+            config = yaml.safe_load(f)
         try:
             for attachment in message.attachments:
                 if attachment.content_type.startswith("image"):
-                    await create_variation(message, attachment)
+                    await create_variation(message, attachment, config["variation_model"])
         except Exception as err:
             await message.channel.send(err)
         return

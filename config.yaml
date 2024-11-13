@@ -11,3 +11,9 @@ image_model:
   model: "dall-e-3"
   size: "1024x1024"
   response_format: "b64_json"
+
+variation_model:
+  model: "stability-ai/stable-diffusion-3.5-large-turbo"
+  cfg: 1
+  steps: 4
+  prompt_strength: 0.8

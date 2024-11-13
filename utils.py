@@ -1,3 +1,6 @@
+import numpy as np
+
+
 async def get_channel_history(
     client: object, channel: object, message_limit: int
 ) -> list[dict[str]]:
