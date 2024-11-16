@@ -82,7 +82,7 @@ async def create_variation(message: object, attachment: object, params: dict) ->
     with open("resources/prompt_enhancers.txt", "r") as f:
         prompt_enhancers = f.readlines()
     prompt = message.content.strip()
-    prompt = f"{prompt}, {random.choice(prompt_enhancers)}"[:-1]
+    # prompt = f"{prompt}, {random.choice(prompt_enhancers)}"[:-1]
     print(prompt)
 
     async with message.channel.typing():
@@ -98,31 +98,31 @@ async def create_variation(message: object, attachment: object, params: dict) ->
             img_str = base64.b64encode(buff.getvalue()).decode("utf-8")
             image = f"data:application/octet-stream;base64,{img_str}"
 
-        response = replicate.run(
-            params["model"],
-            input={
-                "image": image,
-                "prompt": prompt,
-                "cfg": params["cfg"],
-                "steps": params["steps"],
-                "prompt_strength": params["prompt_strength"],
-                "disable_safety_checker": True,
-                "apply_watermark": False,
-            },
-        )
+        for _ in range(3):
+            response = await replicate.async_run(
+                params["model"],
+                input={
+                    "image": image,
+                    "prompt": prompt,
+                    "cfg": params["cfg"],
+                    "steps": params["steps"],
+                    "prompt_strength": params["prompt_strength"],
+                    # "disable_safety_checker": True,
+                    # "apply_watermark": False,
+                },
+            )
+            if response:
+                break
 
-        print(response)
-        if isinstance(response, list):
-            response = response[0]
-            if len(response) == 0:
-                await message.channel.send(
-                    "Sorry, I couldn't generate a variation. Returned empty list."
-                )
-                return
-        if response is None:
-            await message.channel.send("Sorry, I couldn't generate a variation. Returned None.")
+        if not response:
+            await message.channel.send("Sorry, I couldn't generate a variation.")
+            await message.channel.send(f"Attempted prompt: {prompt}")
+            await message.channel.send(f"Response: {response}")
+            await message.channel.send(f"<||{params}||>")
             return
 
+        if isinstance(response, list):
+            response = response[0]
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         variation_filepath = f"images/variations/{timestamp}.png"
         with open(variation_filepath, "wb") as f:
@@ -134,7 +134,8 @@ async def create_variation(message: object, attachment: object, params: dict) ->
     with open("images/image_logs.txt", "a") as f:
         f.write(
             f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
-            f"Variation of: {original_filepath}, Filename: {variation_filepath}\n"
+            f"Variation of: {original_filepath}, Filename: {variation_filepath}, "
+            f"Prompt: {prompt}\n"
         )
 
     return
