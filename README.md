@@ -18,3 +18,9 @@ Users can give hillbot memories or facts about Dave using the `!davefacts` comma
 1. Activate virtual environment: `$ source venv/bin/activate`
 1. Install python libraries: `$ pip install -r requirements.txt`
 1. Run app.py: `python app.py`
+
+## To Do
+
+- Try out the stability API
+
+<https://platform.stability.ai/docs/api-reference#tag/Edit/paths/~1v2beta~1stable-image~1edit~1search-and-replace/post>
