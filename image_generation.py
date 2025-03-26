@@ -1,32 +1,35 @@
-import os
-import uuid
-import base64
-import random
-import yaml
 import asyncio
+import base64
+import os
+import random
 import time
+import uuid
 from datetime import datetime
 from io import BytesIO
 
-from PIL import Image
-from openai import AsyncOpenAI, APIError, RateLimitError
 import discord
 import replicate
 from dotenv import load_dotenv
+from openai import APIError, AsyncOpenAI, RateLimitError
+from PIL import Image
 
+from config import config
 
 load_dotenv()
 
 openai_client = AsyncOpenAI()
 
 
-async def generate_image(message: object) -> None:
-    """Generate an image based on a prompt."""
-
+async def enhance_prompt(original_prompt: str) -> str:
+    """Enhance a prompt by adding a random prompt enhancer."""
     with open("resources/prompt_enhancers.txt", "r") as f:
         prompt_enhancers = f.readlines()
-    with open("config.yaml", "r") as f:
-        config = yaml.safe_load(f)
+    prompt_enhancer = random.choice(prompt_enhancers).strip()
+    return f"{original_prompt}, {prompt_enhancer}"
+
+
+async def generate_image(message: object) -> None:
+    """Generate an image based on a prompt."""
 
     if message.content.strip().lower().startswith("!image"):
         original_prompt = message.content.strip()[6:].strip()
@@ -38,9 +41,9 @@ async def generate_image(message: object) -> None:
     for n_attempts in range(1, 6):
         async with message.channel.typing():
             try:
-                prompt = f"{original_prompt}, {random.choice(prompt_enhancers)}"[:-1]
+                prompt = await enhance_prompt(original_prompt)
                 response = await openai_client.images.generate(
-                    prompt=prompt, **config["image_model"]
+                    prompt=prompt, **config.get_image_config()
                 )
 
                 filename = f"images/creations/{str(uuid.uuid4().hex)}.png"
@@ -59,11 +62,15 @@ async def generate_image(message: object) -> None:
 
             except RateLimitError as err:
                 wait_period = 10 * n_attempts
-                await message.channel.send(f"{err}\nTrying again in {wait_period} seconds!")
+                await message.channel.send(
+                    f"{err}\nTrying again in {wait_period} seconds!"
+                )
                 await asyncio.sleep(wait_period)
 
             except APIError as err:
-                await message.channel.send(f"{err}\nAttempted prompt: {prompt}\nTrying again...")
+                await message.channel.send(
+                    f"{err}\nAttempted prompt: {prompt}\nTrying again..."
+                )
 
             except Exception as err:
                 await message.channel.send(f"{err}\nAttempted prompt: {prompt}")
@@ -79,12 +86,6 @@ async def create_variation(message: object, attachment: object, params: dict) ->
 
     await message.channel.send("Nice image! Let me redraw it for you!")
 
-    with open("resources/prompt_enhancers.txt", "r") as f:
-        prompt_enhancers = f.readlines()
-    prompt = message.content.strip()
-    # prompt = f"{prompt}, {random.choice(prompt_enhancers)}"[:-1]
-    print(prompt)
-
     async with message.channel.typing():
         filetype = attachment.filename.split(".")[-1]
         os.makedirs("images/variations/originals", exist_ok=True)
@@ -97,6 +98,9 @@ async def create_variation(message: object, attachment: object, params: dict) ->
             img.save(buff, format="PNG")
             img_str = base64.b64encode(buff.getvalue()).decode("utf-8")
             image = f"data:application/octet-stream;base64,{img_str}"
+
+        prompt = await enhance_prompt(message.content.strip())
+        print(prompt)
 
         for _ in range(3):
             response = await replicate.async_run(
@@ -157,6 +161,9 @@ async def go_deeper(message: object) -> None:
         most_recent_variation = files[-1]
 
         async with message.channel.typing():
+            prompt = await enhance_prompt(message.content.strip())
+            print(prompt)
+
             response = await openai_client.images.create_variation(
                 image=open(f"images/variations/{most_recent_variation}", "rb"),
                 response_format="b64_json",

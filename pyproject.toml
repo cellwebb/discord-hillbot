@@ -1,0 +1,32 @@
+[project]
+name = "hillbot"
+version = "0.1.0"
+description = "Personal Discord bot for image generation and chat"
+authors = [
+    { name = "Cell Webb" }
+]
+requires-python = ">=3.11"
+
+dependencies = [
+    "discord.py>=2.3.0",
+    "numpy>=1.24.0",
+    "openai>=1.3.0",
+    "replicate>=0.10.0",
+    "pyyaml>=6.0.1",
+    "pillow>=10.0.0",
+    "python-dotenv>=1.0.1",
+]
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "black>=23.7.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = {find = {}}

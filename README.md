@@ -1,4 +1,4 @@
-# discord-hillbot
+# Hillbot
 
 :brain: Hillbot is a chatbot with episodic and semantic memories.
 
@@ -6,22 +6,62 @@
 
 ![Image](assets/Screenshot.png)
 
-## !davefacts
+## Features
 
-Users can give hillbot memories or facts about Dave using the `!davefacts` command, like so: `!davefacts Dave was born very late in life to a family of naked mole rats`
+- Chat with Dave-inspired personality
+- Image generation using OpenAI's DALL-E
+- Image variations using Stable Diffusion
+- Memory system for Dave facts
+- Prompt enhancement system
 
-## setup instructions
+## Commands
 
-1. Clone repo: `$ git clone https://github.com/cellwebb/discord-hillbot.git`
-1. Set your OpenAI API key and Discord bot token to the environment variables `$OPENAI_API_KEY` and `$DISCORD_HILLBOT_TOKEN`
-1. Create virtual environment: `$ python -m venv venv`
-1. Activate virtual environment: `$ source venv/bin/activate`
-1. Install python libraries: `$ pip install -r requirements.txt`
-1. Run app.py: `python app.py`
+- `!davefacts` - Add memories about Dave (e.g. `!davefacts Dave was born very late in life to a family of naked mole rats`)
+- `!prompt_enhancer` - Add prompt enhancement templates
+- `!image` or `!img` or `!i` - Generate images
+- `!again` or `again` or `more` or `deeper` - Create variations of images
 
-## To Do
+## Setup
 
-Try out image APIs
+1. Clone the repository:
 
-- [Stability AI](https://platform.stability.ai/docs/api-reference#tag/Edit/paths/~1v2beta~1stable-image~1edit~1search-and-replace/post) - More control
-- [getimg.ai](https://getimg.ai/) - Possibly cheapest image API
+   ```bash
+   git clone https://github.com/cellwebb/discord-hillbot.git
+   cd discord-hillbot
+   ```
+
+2. Set environment variables:
+
+   ```bash
+   export OPENAI_API_KEY=your_openai_api_key
+   export DISCORD_HILLBOT_TOKEN=your_discord_bot_token
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   make install
+   ```
+
+4. Run the bot
+
+   ```bash
+   make run
+   ```
+
+## Development
+
+- Run tests: `make test`
+- Check code style: `make lint`
+- Format code: `make format`
+- Clean up: `make clean`
+
+## Requirements
+
+- Python 3.11+
+- OpenAI API key
+- Discord bot token
+
+## License
+
+MIT License

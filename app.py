@@ -1,15 +1,14 @@
 import asyncio
-import discord
-import logging
 import os
 import time
-import yaml
 
-from openai import AsyncOpenAI, APIError, RateLimitError
+import discord
+from openai import APIError, AsyncOpenAI, RateLimitError
 
-from image_generation import generate_image, create_variation, go_deeper
-from utils import get_channel_history, add_dave_fact, add_prompt_enhancer, message_contains_image
-
+from config import config
+from image_generation import create_variation, generate_image, go_deeper
+from utils import (add_dave_fact, add_prompt_enhancer, get_channel_history,
+                   message_contains_image)
 
 DISCORD_CHARACTER_LIMIT = 2000
 
@@ -52,12 +51,12 @@ async def on_message(message):
         and message.channel.name == "hillbot-draws"
         and message_contains_image(message)
     ):
-        with open("config.yaml", "r") as f:
-            config = yaml.safe_load(f)
         try:
             for attachment in message.attachments:
                 if attachment.content_type.startswith("image"):
-                    await create_variation(message, attachment, config["variation_model"])
+                    await create_variation(
+                        message, attachment, config.get_variation_config()
+                    )
         except Exception as err:
             await message.channel.send(err)
         return
@@ -87,12 +86,10 @@ async def on_message(message):
             system_msg = f.read()
         with open("resources/davefacts.txt", "r") as f:
             davefacts = f.read()
-        with open("config.yaml", "r") as f:
-            config = yaml.safe_load(f)
 
         async with message.channel.typing():
             conversation_history = await get_channel_history(
-                client, message.channel, **config["discord"]
+                client, message.channel, **config.get_discord_config()
             )
 
             messages = [{"role": "system", "content": system_msg + "\n" + davefacts}]
@@ -107,17 +104,21 @@ async def on_message(message):
             for n_attempts in range(1, 6):
                 try:
                     response = await openai_client.chat.completions.create(
-                        messages=messages, **config["llm"]
+                        messages=messages, **config.get_llm_config()
                     )
                     reply = response.choices[0].message.content
 
                     for i in range(0, len(reply), DISCORD_CHARACTER_LIMIT):
-                        await message.channel.send(reply[i : i + DISCORD_CHARACTER_LIMIT])
+                        await message.channel.send(
+                            reply[i : i + DISCORD_CHARACTER_LIMIT]
+                        )
                     return
 
                 except RateLimitError as err:
                     wait_period = 10 * n_attempts
-                    await message.channel.send(f"{err}\nI'll try again in {wait_period} seconds!")
+                    await message.channel.send(
+                        f"{err}\nI'll try again in {wait_period} seconds!"
+                    )
                     await asyncio.sleep(wait_period)
 
                 except APIError as err:
