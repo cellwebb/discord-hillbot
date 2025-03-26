@@ -1,4 +1,4 @@
-.PHONY: install run test lint format clean
+.PHONY: install run test lint format clean bump-major bump-minor bump-patch
 
 install:
 	pip install -e .
@@ -24,3 +24,12 @@ clean:
 	rm -rf .pytest_cache
 	rm -rf .coverage
 	rm -rf htmlcov
+
+bump-major:
+	bump-my-version bump major
+
+bump-minor:
+	bump-my-version bump minor
+
+bump-patch:
+	bump-my-version bump patch

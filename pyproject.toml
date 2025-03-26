@@ -1,6 +1,6 @@
 [project]
 name = "hillbot"
-version = "0.1.0"
+version = "0.2.0"
 description = "Personal Discord bot for image generation and chat"
 authors = [
     { name = "Cell Webb" }
@@ -24,6 +24,7 @@ dev = [
     "flake8>=6.0.0",
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.21.0",
+    "bump-my-version>=0.10.0",
 ]
 
 [build-system]
@@ -45,3 +46,13 @@ target-version = ["py313"]
 [tool.isort]
 profile = "black"
 line_length = 100
+
+[tool.bump-my-version]
+current_version = "0.2.0"
+files = [
+    "pyproject.toml",
+    "CHANGELOG.md"
+]
+commit = true
+tag = true
+push = false

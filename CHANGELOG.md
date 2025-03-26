@@ -29,6 +29,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed redundant setup.py file
 - Cleaned up unused imports and code
 
+## [0.2.0] - 2025-03-26
+
+### Added
+
+- Message handling refactored into modular functions
+- Improved error handling and logging system
+- Enhanced README with Dave-inspired personality
+- Version management with bump-my-version
+- Makefile commands for version management
+
+### Changed
+
+- Simplified message handling logic
+- Improved code organization
+- Enhanced documentation
+- Updated dependency management
+
+### Fixed
+
+- Various code cleanup and organization
+- Improved error handling
+- Better configuration management
+
 ## [0.1.0] - 2025-03-26
 
 ### Added
@@ -46,5 +69,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved error handling
 - Better configuration management
 
-[Unreleased]: https://github.com/cellwebb/discord-hillbot/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/cellwebb/discord-hillbot/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/cellwebb/discord-hillbot/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/cellwebb/discord-hillbot/releases/tag/v0.1.0
