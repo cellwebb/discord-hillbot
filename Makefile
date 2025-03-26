@@ -1,4 +1,4 @@
-.PHONY: install run test lint format clean bump-major bump-minor bump-patch
+.PHONY: install run test lint format clean bump-major bump-minor bump-patch tdd test-watch
 
 install:
 	pip install -e .
@@ -8,6 +8,12 @@ run:
 
 test:
 	pytest --cov=hillbot --cov-report term-missing --cov-report html
+
+test-watch:
+	watchmedo shell-command --patterns="*.py" --recursive --command='clear && make test' hillbot/
+
+tdd:
+	watchmedo shell-command --patterns="*.py" --recursive --command='clear && make test' hillbot/
 
 lint:
 	flake8 hillbot/

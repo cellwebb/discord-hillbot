@@ -39,14 +39,24 @@ async def get_channel_history(
             channel_history.append({"role": role, "name": name, "content": content})
         else:
             if image_content:
-                channel_history.append(
-                    {"role": "user", "name": name, "content": image_content}
-                )
+                channel_history.append({"role": "user", "name": name, "content": image_content})
             channel_history.append({"role": role, "name": name, "content": text_json})
 
     channel_history.reverse()
 
     return channel_history
+
+
+async def format_message(message: object) -> str:
+    """Format a Discord message with the author's name.
+
+    Args:
+        message: Discord message object
+
+    Returns:
+        str: Formatted message in the format "[Author Name]: message content"
+    """
+    return f"[{message.author.name}]: {message.content}"
 
 
 async def add_dave_fact(message: object) -> None:
@@ -67,7 +77,7 @@ async def add_prompt_enhancer(message: object) -> None:
     return
 
 
-def message_contains_image(message: object) -> bool:
+async def message_contains_image(message: object) -> bool:
     """Check if a message contains an image."""
     if message.attachments:
         for x in message.attachments:
