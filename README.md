@@ -1,27 +1,27 @@
-# Hillbot
+# Hillbot: Taking Dave's place in the world
 
-:brain: Hillbot is a chatbot with episodic and semantic memories.
+:brain: Hillbot is a chatbot with episodic and semantic memories, which is just a fancy way of saying it's really good at remembering all the crazy stuff my friend Dave says and does.
 
-:robot: I made hillbot to impersonate my friend Dave. Dave's a loveable, quirky, and funny guy with a deep interest in comedy, movies, tv, video games, and board games. Hillbot's a loveable, quirky, and funny bot with a deep interest in comedy, movies, tv, video games, and board games. Hillbot does such a good job impersonating Dave that sometimes it isn't sure if it's Dave or if it's Hillbot!
+:robot: I created Hillbot to impersonate Dave, a comedy, movie, TV, video game, and board game enthusiast. Hillbot embodies Dave's best qualities, minus the ability to eat an entire pizza by itself. Sometimes Hillbot gets so into character that it's hard to tell if it's really Dave or just the bot – and that's part of the fun!
 
 ![Image](assets/Screenshot.png)
 
-## Features
+## Features: What Hillbot Can Do
 
-- Chat with Dave-inspired personality
-- Image generation using OpenAI's DALL-E
-- Image variations using Stable Diffusion
-- Memory system for Dave facts
-- Prompt enhancement system
+- Engage in conversations with Hillbot and experience Dave's signature personality, complete with witty one-liners and humorous jokes
+- Generate images using OpenAI's DALL-E, perfect for creating memes
+- Create image variations using Stable Diffusion, allowing you to see Dave in different scenarios
+- Feed Hillbot's memory system with interesting facts about Dave, like the time he accidentally superglued his shoes to the floor
+- Utilize the prompt enhancement system to help Hillbot come up with creative and humorous responses
 
-## Commands
+## Commands: How to Interact with Hillbot
 
-- `!davefacts` - Add memories about Dave (e.g. `!davefacts Dave was born very late in life to a family of naked mole rats`)
-- `!prompt_enhancer` - Add prompt enhancement templates
-- `!image` or `!img` or `!i` - Generate images
-- `!again` or `again` or `more` or `deeper` - Create variations of images
+- `!davefacts` - Add memories about Dave, like the time he tried to cook a frozen pizza in the microwave (e.g. `!davefacts Dave once tried to break the world record for most hamburgers eaten in one sitting`)
+- `!prompt_enhancer` - Add prompt enhancement templates to help Hillbot come up with the perfect joke
+- `!image` or `!img` or `!i` - Generate images to enhance your conversations
+- `!again` or `again` or `more` or `deeper` - Create variations of images to explore different scenarios
 
-## Setup
+## Setup: Getting Hillbot Up and Running
 
 1. Clone the repository:
 
@@ -49,14 +49,14 @@
    make run
    ```
 
-## Development
+## Development: For Developers
 
 - Run tests: `make test`
 - Check code style: `make lint`
 - Format code: `make format`
 - Clean up: `make clean`
 
-## Requirements
+## Requirements: The Essentials
 
 - Python 3.11+
 - OpenAI API key
