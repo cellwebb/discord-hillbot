@@ -28,57 +28,52 @@ async def on_ready():
     print(f'{time.strftime("%I:%M:%S %p")} - We have logged in as {client.user}')
 
 
-@client.event
-async def on_message(message):
-    with open("discord.log", "a") as f:
-        f.write(
-            f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}\n'  # noqa
-        )
-
+async def handle_special_commands(message):
+    """Handle special commands like !davefacts and !prompt_enhancer."""
     if message.content.startswith("!davefacts"):
         add_dave_fact(message)
-        return
+        return True
     if message.content.startswith("!prompt_enhancer"):
         add_prompt_enhancer(message)
-        return
+        return True
+    return False
+
+
+async def handle_image_commands(message):
+    """Handle image-related commands and variations."""
     if message.content.lower().startswith("!i"):
         await generate_image(message)
-        return
+        return True
 
-    if message.author == client.user:
-        return
-    if message.mention_everyone:
-        return
+    if not hasattr(message.channel, "name"):
+        return False
 
-    if (
-        hasattr(message.channel, "name")
-        and message.channel.name == "hillbot-draws"
-        and message_contains_image(message)
-    ):
-        try:
-            for attachment in message.attachments:
-                if attachment.content_type.startswith("image"):
-                    await create_variation(message, attachment, config.get_variation_config())
-        except Exception as err:
-            await message.channel.send(err)
-        return
+    if message.channel.name == "hillbot-draws":
+        if message_contains_image(message):
+            try:
+                for attachment in message.attachments:
+                    if attachment.content_type.startswith("image"):
+                        await create_variation(message, attachment, config.get_variation_config())
+                return True
+            except Exception as err:
+                await message.channel.send(err)
+                return True
 
-    if (
-        hasattr(message.channel, "name")
-        and message.channel.name == "hillbot-draws"
-        and (
-            message.content.lower().startswith("!again")
-            or message.content.lower().startswith("again")
-            or message.content.lower().startswith("more")
-            or message.content.lower().startswith("deeper")
-        )
-    ):
-        try:
-            await go_deeper(message)
-        except Exception as err:
-            await message.channel.send(err)
-        return
+        if any(
+            message.content.lower().startswith(cmd) for cmd in ["!again", "again", "more", "deeper"]
+        ):
+            try:
+                await go_deeper(message)
+                return True
+            except Exception as err:
+                await message.channel.send(err)
+                return True
 
+    return False
+
+
+async def handle_chat_commands(message):
+    """Handle chat commands and AI responses."""
     if (
         "hillbot" in message.content.lower()
         or client.user.mentioned_in(message)
@@ -112,7 +107,7 @@ async def on_message(message):
 
                     for i in range(0, len(reply), DISCORD_CHARACTER_LIMIT):
                         await message.channel.send(reply[i : i + DISCORD_CHARACTER_LIMIT])
-                    return
+                    return True
 
                 except RateLimitError as err:
                     wait_period = 10 * n_attempts
@@ -124,10 +119,37 @@ async def on_message(message):
 
                 except Exception as err:
                     await message.channel.send(err)
-                    return
+                    return True
             else:
                 await message.channel.send("Please try again later!")
-                return
+                return True
+
+    return False
+
+
+@client.event
+async def on_message(message):
+    """Handle incoming messages."""
+    with open("discord.log", "a") as f:
+        f.write(
+            f'[{time.strftime("%I:%M:%S %p")}] | #{message.channel} | {message.author}: {message.content}\n'  # noqa
+        )
+
+    # Ignore bot's own messages and @everyone mentions
+    if message.author == client.user or message.mention_everyone:
+        return
+
+    # Handle special commands
+    if await handle_special_commands(message):
+        return
+
+    # Handle image commands
+    if await handle_image_commands(message):
+        return
+
+    # Handle chat commands
+    if await handle_chat_commands(message):
+        return
 
 
 # handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
