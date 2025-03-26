@@ -20,14 +20,6 @@ load_dotenv()
 openai_client = AsyncOpenAI()
 
 
-async def enhance_prompt(original_prompt: str) -> str:
-    """Enhance a prompt by adding a random prompt enhancer."""
-    with open("resources/prompt_enhancers.txt", "r") as f:
-        prompt_enhancers = f.readlines()
-    prompt_enhancer = random.choice(prompt_enhancers).strip()
-    return f"{original_prompt}, {prompt_enhancer}"
-
-
 async def generate_image(message: object) -> None:
     """Generate an image based on a prompt."""
     prefixes = ("!image", "!img", "!i")
@@ -63,18 +55,13 @@ async def generate_image(message: object) -> None:
 
             except RateLimitError as err:
                 wait_period = 10 * n_attempts
-                await message.channel.send(
-                    f"{err}\nTrying again in {wait_period} seconds!"
-                )
-                await asyncio.sleep(wait_period)
+                await handle_error(message, err, prompt, True, wait_period)
 
             except APIError as err:
-                await message.channel.send(
-                    f"{err}\nAttempted prompt: {prompt}\nTrying again..."
-                )
+                await handle_error(message, err, prompt, True)
 
             except Exception as err:
-                await message.channel.send(f"{err}\nAttempted prompt: {prompt}")
+                await handle_error(message, err, prompt)
                 return
     else:
         await message.channel.send("Please try again later!")
@@ -184,3 +171,34 @@ async def go_deeper(message: object) -> None:
             )
 
     return
+
+
+async def enhance_prompt(original_prompt: str) -> str:
+    """Enhance a prompt by adding a random prompt enhancer."""
+    with open("resources/prompt_enhancers.txt", "r") as f:
+        prompt_enhancers = f.readlines()
+    prompt_enhancer = random.choice(prompt_enhancers).strip()
+    return f"{original_prompt}, {prompt_enhancer}"
+
+
+async def handle_error(
+    message: object,
+    error: Exception,
+    prompt: str = "",
+    retry: bool = False,
+    wait_seconds: int = 0,
+) -> None:
+    """Handle errors with consistent messaging."""
+    error_msg = f"{error}"
+    if prompt:
+        error_msg += f"\nAttempted prompt: {prompt}"
+
+    if wait_seconds > 0:
+        error_msg += f"\nTrying again in {wait_seconds} seconds!"
+    elif retry:
+        error_msg += "\nTrying again..."
+
+    await message.channel.send(error_msg)
+
+    if wait_seconds > 0:
+        await asyncio.sleep(wait_seconds)
