@@ -30,13 +30,14 @@ async def enhance_prompt(original_prompt: str) -> str:
 
 async def generate_image(message: object) -> None:
     """Generate an image based on a prompt."""
+    prefixes = ("!image", "!img", "!i")
+    content = message.content.strip().lower()
+    original_prompt = ""
 
-    if message.content.strip().lower().startswith("!image"):
-        original_prompt = message.content.strip()[6:].strip()
-    elif message.content.strip().lower().startswith("!img"):
-        original_prompt = message.content.strip()[4:].strip()
-    elif message.content.strip().lower().startswith("!i"):
-        original_prompt = message.content.strip()[2:].strip()
+    for prefix in prefixes:
+        if content.startswith(prefix):
+            original_prompt = content[len(prefix) :].strip()
+            break
 
     for n_attempts in range(1, 6):
         async with message.channel.typing():
