@@ -28,7 +28,10 @@ async def get_channel_history(
         if message.attachments:
             for attachment in message.attachments:
                 if attachment.content_type.startswith("image"):
-                    image_json = {"type": "image_url", "image_url": {"url": attachment.url}}
+                    image_json = {
+                        "type": "image_url",
+                        "image_url": {"url": attachment.url},
+                    }
                     image_content.append(image_json)
 
         if role == "user":
@@ -36,7 +39,9 @@ async def get_channel_history(
             channel_history.append({"role": role, "name": name, "content": content})
         else:
             if image_content:
-                channel_history.append({"role": "user", "name": name, "content": image_content})
+                channel_history.append(
+                    {"role": "user", "name": name, "content": image_content}
+                )
             channel_history.append({"role": role, "name": name, "content": text_json})
 
     channel_history.reverse()

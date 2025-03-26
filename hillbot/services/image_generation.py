@@ -9,11 +9,10 @@ from io import BytesIO
 
 import discord
 import replicate
+from config import config
 from dotenv import load_dotenv
 from openai import APIError, AsyncOpenAI, RateLimitError
 from PIL import Image
-
-from config import config
 
 load_dotenv()
 

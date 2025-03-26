@@ -3,10 +3,9 @@ import os
 import time
 
 import discord
-from openai import APIError, AsyncOpenAI, RateLimitError
-
 from config import config
 from image_generation import create_variation, generate_image, go_deeper
+from openai import APIError, AsyncOpenAI, RateLimitError
 from utils import (add_dave_fact, add_prompt_enhancer, get_channel_history,
                    message_contains_image)
 
