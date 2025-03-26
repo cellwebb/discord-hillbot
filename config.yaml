@@ -15,5 +15,5 @@ image_model:
 variation_model:
   model: "stability-ai/stable-diffusion-3.5-large-turbo"
   cfg: 1
-  steps: 4
+  steps: 6
   prompt_strength: 0.8

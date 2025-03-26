@@ -21,6 +21,7 @@ Users can give hillbot memories or facts about Dave using the `!davefacts` comma
 
 ## To Do
 
-- Try out the stability API
+Try out image APIs
 
-<https://platform.stability.ai/docs/api-reference#tag/Edit/paths/~1v2beta~1stable-image~1edit~1search-and-replace/post>
+- [Stability AI](https://platform.stability.ai/docs/api-reference#tag/Edit/paths/~1v2beta~1stable-image~1edit~1search-and-replace/post) - More control
+- [getimg.ai](https://getimg.ai/) - Possibly cheapest image API
