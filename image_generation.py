@@ -31,38 +31,39 @@ async def generate_image(message: object) -> None:
             original_prompt = content[len(prefix) :].strip()
             break
 
+    await message.channel.typing()
+
     for n_attempts in range(1, 6):
-        async with message.channel.typing():
-            try:
-                prompt = await enhance_prompt(original_prompt)
-                response = await openai_client.images.generate(
-                    prompt=prompt, **config.get_image_config()
+        try:
+            prompt = await enhance_prompt(original_prompt)
+            response = await openai_client.images.generate(
+                prompt=prompt, **config.get_image_config()
+            )
+
+            filename = f"images/creations/{str(uuid.uuid4().hex)}.png"
+            with open(filename, "wb") as f:
+                f.write(base64.standard_b64decode(response.data[0].b64_json))
+
+            await message.channel.send(prompt, file=discord.File(filename))
+
+            with open("images/image_logs.txt", "a") as f:
+                f.write(
+                    f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
+                    f"Prompt: {prompt}, Filename: {filename}, "
+                    f"Revised Prompt:{response.data[0].revised_prompt}\n"
                 )
+            return
 
-                filename = f"images/creations/{str(uuid.uuid4().hex)}.png"
-                with open(filename, "wb") as f:
-                    f.write(base64.standard_b64decode(response.data[0].b64_json))
+        except RateLimitError as err:
+            wait_period = 10 * n_attempts
+            await handle_error(message, err, prompt, True, wait_period)
 
-                await message.channel.send(prompt, file=discord.File(filename))
+        except APIError as err:
+            await handle_error(message, err, prompt, True)
 
-                with open("images/image_logs.txt", "a") as f:
-                    f.write(
-                        f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
-                        f"Prompt: {prompt}, Filename: {filename}, "
-                        f"Revised Prompt:{response.data[0].revised_prompt}\n"
-                    )
-                return
-
-            except RateLimitError as err:
-                wait_period = 10 * n_attempts
-                await handle_error(message, err, prompt, True, wait_period)
-
-            except APIError as err:
-                await handle_error(message, err, prompt, True)
-
-            except Exception as err:
-                await handle_error(message, err, prompt)
-                return
+        except Exception as err:
+            await handle_error(message, err, prompt)
+            return
     else:
         await message.channel.send("Please try again later!")
 
