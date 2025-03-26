@@ -7,8 +7,7 @@ run:
 	uv run app.py
 
 test:
-	pip install -e .[dev]
-	pytest --cov=hillbot
+	pytest --cov=hillbot --cov-report term-missing --cov-report html
 
 lint:
 	flake8 hillbot/

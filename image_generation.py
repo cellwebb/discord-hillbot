@@ -82,10 +82,10 @@ async def create_variation(message: object, attachment: object, params: dict) ->
         await attachment.save(original_filepath)
 
         with Image.open(original_filepath) as img:
-            buff = BytesIO()
-            img.save(buff, format="PNG")
-            img_str = base64.b64encode(buff.getvalue()).decode("utf-8")
-            image = f"data:application/octet-stream;base64,{img_str}"
+            with BytesIO() as buff:
+                img.save(buff, format="PNG")
+                img_str = base64.b64encode(buff.getvalue()).decode("utf-8")
+                image = f"data:application/octet-stream;base64,{img_str}"
 
         prompt = await enhance_prompt(message.content.strip())
         print(prompt)
