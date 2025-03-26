@@ -9,19 +9,18 @@ from io import BytesIO
 
 import discord
 import replicate
-from config import config
 from dotenv import load_dotenv
 from openai import APIError, AsyncOpenAI, RateLimitError
 from PIL import Image
+
+from hillbot.core.config import config
 
 load_dotenv()
 
 openai_client = AsyncOpenAI()
 
 
-async def extract_prompt(
-    message_content: str, prefixes: tuple = ("!image", "!img", "!i")
-) -> str:
+async def extract_prompt(message_content: str, prefixes: tuple = ("!image", "!img", "!i")) -> str:
     """Extract the prompt from the message content."""
     content = message_content.strip().lower()
     original_prompt = ""

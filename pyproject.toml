@@ -5,7 +5,7 @@ description = "Personal Discord bot for image generation and chat"
 authors = [
     { name = "Cell Webb" }
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 
 dependencies = [
     "discord.py>=2.3.0",
@@ -27,11 +27,21 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["setuptools>=61.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-packages = {find = {}}
+packages = ["hillbot", "hillbot.core", "hillbot.services", "hillbot.utils", "hillbot.tests"]
 
 [tool.pytest.ini_options]
 asyncio_default_fixture_loop_scope = "function"
+testpaths = ["hillbot/tests"]
+python_files = "test_*.py"
+
+[tool.black]
+line-length = 100
+target-version = ["py313"]
+
+[tool.isort]
+profile = "black"
+line_length = 100

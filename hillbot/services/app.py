@@ -3,11 +3,16 @@ import os
 import time
 
 import discord
-from config import config
-from image_generation import create_variation, generate_image, go_deeper
 from openai import APIError, AsyncOpenAI, RateLimitError
-from utils import (add_dave_fact, add_prompt_enhancer, get_channel_history,
-                   message_contains_image)
+
+from hillbot.core.config import config
+from hillbot.services.image_generation import create_variation, generate_image, go_deeper
+from hillbot.utils.utils import (
+    add_dave_fact,
+    add_prompt_enhancer,
+    get_channel_history,
+    message_contains_image,
+)
 
 DISCORD_CHARACTER_LIMIT = 2000
 
@@ -53,9 +58,7 @@ async def on_message(message):
         try:
             for attachment in message.attachments:
                 if attachment.content_type.startswith("image"):
-                    await create_variation(
-                        message, attachment, config.get_variation_config()
-                    )
+                    await create_variation(message, attachment, config.get_variation_config())
         except Exception as err:
             await message.channel.send(err)
         return
@@ -108,16 +111,12 @@ async def on_message(message):
                     reply = response.choices[0].message.content
 
                     for i in range(0, len(reply), DISCORD_CHARACTER_LIMIT):
-                        await message.channel.send(
-                            reply[i : i + DISCORD_CHARACTER_LIMIT]
-                        )
+                        await message.channel.send(reply[i : i + DISCORD_CHARACTER_LIMIT])
                     return
 
                 except RateLimitError as err:
                     wait_period = 10 * n_attempts
-                    await message.channel.send(
-                        f"{err}\nI'll try again in {wait_period} seconds!"
-                    )
+                    await message.channel.send(f"{err}\nI'll try again in {wait_period} seconds!")
                     await asyncio.sleep(wait_period)
 
                 except APIError as err:

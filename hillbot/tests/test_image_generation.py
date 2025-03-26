@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import pytest_asyncio
 
-from hillbot.image_generation import extract_prompt, generate_image
+from hillbot.services.image_generation import extract_prompt, generate_image
 
 
 class MockMessage:
@@ -28,7 +28,7 @@ async def mock_message():
 
 
 @pytest.mark.asyncio
-@patch("hillbot.image_generation.create_image_from_prompt")
+@patch("hillbot.services.image_generation.create_image_from_prompt")
 async def test_generate_image(mock_create, mock_message):
     # Setup the mock return value
     mock_create.return_value = (

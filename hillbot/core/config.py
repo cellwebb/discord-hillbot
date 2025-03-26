@@ -1,4 +1,5 @@
 import os
+import pathlib
 from typing import Any, Dict
 
 import yaml
@@ -9,8 +10,12 @@ load_dotenv()
 
 class Config:
     def __init__(self):
-        # Load YAML config
-        with open("config.yaml", "r") as f:
+        # Find the current directory (where this file is located)
+        current_file = pathlib.Path(__file__).resolve()
+        current_dir = current_file.parent
+        # Load YAML config from the same directory as this file
+        config_path = current_dir / "config.yaml"
+        with open(config_path, "r") as f:
             self.yaml_config = yaml.safe_load(f)
 
         # Discord settings
@@ -32,9 +37,7 @@ class Config:
         self.VARIATION_MODEL = self.yaml_config["variation_model"]["model"]
         self.VARIATION_CFG = self.yaml_config["variation_model"]["cfg"]
         self.VARIATION_STEPS = self.yaml_config["variation_model"]["steps"]
-        self.VARIATION_PROMPT_STRENGTH = self.yaml_config["variation_model"][
-            "prompt_strength"
-        ]
+        self.VARIATION_PROMPT_STRENGTH = self.yaml_config["variation_model"]["prompt_strength"]
 
         # Discord message history
         self.DISCORD_MESSAGE_LIMIT = self.yaml_config["discord"]["message_limit"]
