@@ -20,10 +20,11 @@ load_dotenv()
 openai_client = AsyncOpenAI()
 
 
-async def generate_image(message: object) -> None:
-    """Generate an image based on a prompt."""
-    prefixes = ("!image", "!img", "!i")
-    content = message.content.strip().lower()
+async def extract_prompt(
+    message_content: str, prefixes: tuple = ("!image", "!img", "!i")
+) -> str:
+    """Extract the prompt from the message content."""
+    content = message_content.strip().lower()
     original_prompt = ""
 
     for prefix in prefixes:
@@ -31,38 +32,59 @@ async def generate_image(message: object) -> None:
             original_prompt = content[len(prefix) :].strip()
             break
 
+    return original_prompt
+
+
+async def create_image_from_prompt(prompt: str):
+    """Create an image from a prompt using OpenAI API."""
+    enhanced_prompt = await enhance_prompt(prompt)
+    response = await openai_client.images.generate(
+        prompt=enhanced_prompt, **config.get_image_config()
+    )
+
+    filename = f"images/creations/{str(uuid.uuid4().hex)}.png"
+    with open(filename, "wb") as f:
+        f.write(base64.standard_b64decode(response.data[0].b64_json))
+
+    return filename, enhanced_prompt, response.data[0].revised_prompt
+
+
+async def log_image_creation(prompt: str, filename: str, revised_prompt: str):
+    """Log image creation details to a file."""
+    with open("images/image_logs.txt", "a") as f:
+        f.write(
+            f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
+            f"Prompt: {prompt}, Filename: {filename}, "
+            f"Revised Prompt:{revised_prompt}\n"
+        )
+
+
+async def generate_image(message: object) -> None:
+    """Generate an image based on a prompt."""
+    original_prompt = await extract_prompt(message.content)
+    if not original_prompt:
+        return
+
     await message.channel.typing()
 
     for n_attempts in range(1, 6):
         try:
-            prompt = await enhance_prompt(original_prompt)
-            response = await openai_client.images.generate(
-                prompt=prompt, **config.get_image_config()
+            filename, enhanced_prompt, revised_prompt = await create_image_from_prompt(
+                original_prompt
             )
-
-            filename = f"images/creations/{str(uuid.uuid4().hex)}.png"
-            with open(filename, "wb") as f:
-                f.write(base64.standard_b64decode(response.data[0].b64_json))
-
-            await message.channel.send(prompt, file=discord.File(filename))
-
-            with open("images/image_logs.txt", "a") as f:
-                f.write(
-                    f'Timestamp: {time.strftime("%Y-%m-%d %H:%M:%S")}, '
-                    f"Prompt: {prompt}, Filename: {filename}, "
-                    f"Revised Prompt:{response.data[0].revised_prompt}\n"
-                )
+            await message.channel.send(enhanced_prompt, file=discord.File(filename))
+            await log_image_creation(enhanced_prompt, filename, revised_prompt)
             return
 
         except RateLimitError as err:
             wait_period = 10 * n_attempts
-            await handle_error(message, err, prompt, True, wait_period)
+            await handle_error(message, err, original_prompt, True, wait_period)
 
         except APIError as err:
-            await handle_error(message, err, prompt, True)
+            await handle_error(message, err, original_prompt, True)
 
         except Exception as err:
-            await handle_error(message, err, prompt)
+            await handle_error(message, err, original_prompt)
             return
     else:
         await message.channel.send("Please try again later!")
