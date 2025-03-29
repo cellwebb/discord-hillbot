@@ -48,14 +48,7 @@ async def get_channel_history(
 
 
 async def format_message(message: object) -> str:
-    """Format a Discord message with the author's name.
-
-    Args:
-        message: Discord message object
-
-    Returns:
-        str: Formatted message in the format "[Author Name]: message content"
-    """
+    """Format Discord message with author's name."""
     return f"[{message.author.name}]: {message.content}"
 
 

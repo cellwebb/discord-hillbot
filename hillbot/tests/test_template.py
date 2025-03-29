@@ -14,11 +14,11 @@ from hillbot.utils.utils import format_message
 
 @pytest.mark.unit
 class TestFormatMessage:
-    """Test suite for format_message function"""
+    """Test format_message function"""
 
     @pytest.fixture
     def mock_discord_message(self):
-        """Fixture for creating a mock Discord message"""
+        """Mock Discord message"""
         mock = AsyncMock()
         mock.content = "test message"
         mock.author.name = "Test User"
@@ -38,7 +38,7 @@ class TestFormatMessage:
 
     @pytest.mark.asyncio
     async def test_format_message_empty(self, mock_discord_message):
-        """Test formatting empty message"""
+        """Test empty message formatting"""
         # Arrange
         mock_discord_message.content = ""
         expected_result = "[Test User]: "
