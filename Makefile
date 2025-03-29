@@ -4,7 +4,7 @@ install:
 	pip install -e .
 
 run:
-	uv run app.py
+	uv run hillbot/services/app.py
 
 test:
 	pytest --cov=hillbot --cov-report term-missing --cov-report html
